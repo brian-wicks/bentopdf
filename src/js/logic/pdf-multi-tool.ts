@@ -14,6 +14,7 @@ import { initializeGlobalShortcuts } from '../utils/shortcuts-init.js';
 import { repairPdfFile } from './repair-pdf.js';
 import { partitionIncomingFiles } from '../utils/multi-tool-file-input.js';
 import { convertImagesToPdfFile } from '../utils/images-to-pdf-lib.js';
+import { applyPageSelectClick } from '../utils/page-range-select.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -41,6 +42,8 @@ function generateId(): string {
 
 let allPages: PageData[] = [];
 let selectedPages: Set<number> = new Set();
+let lastSelectedIndex: number | null = null;
+let selectionBeforeShift: Set<number> | null = null;
 let currentPdfDocs: PDFLibDocument[] = [];
 let splitMarkers: Set<number> = new Set();
 let isRendering = false;
@@ -73,6 +76,8 @@ function restore(snap: Snapshot) {
     canvas: p.canvas,
   }));
   selectedPages = new Set(snap.selectedPages);
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   splitMarkers = new Set(snap.splitMarkers);
   updatePageDisplay();
 }
@@ -460,6 +465,8 @@ function resetAll() {
   snapshot();
   allPages = [];
   selectedPages.clear();
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   splitMarkers.clear();
   currentPdfDocs = [];
   pageCanvasCache.clear();
@@ -711,7 +718,7 @@ function createPageElement(
   selectBtn.appendChild(selectIcon);
   selectBtn.onclick = (e) => {
     e.stopPropagation();
-    toggleSelectOptimized(index);
+    handlePageSelectClick(index, (e as MouseEvent).shiftKey);
   };
 
   // Rotate button
@@ -835,14 +842,34 @@ function setupSortable() {
   });
 }
 
-function toggleSelectOptimized(index: number) {
-  if (selectedPages.has(index)) {
-    selectedPages.delete(index);
-  } else {
-    selectedPages.add(index);
-  }
+function handlePageSelectClick(index: number, shiftKey: boolean) {
+  const isRangeUpdate =
+    shiftKey && lastSelectedIndex !== null && selectionBeforeShift !== null;
 
-  // Only update the specific card instead of re-rendering everything
+  const result = applyPageSelectClick(
+    {
+      selected: selectedPages,
+      anchorIndex: lastSelectedIndex,
+      baselineSelection: selectionBeforeShift,
+    },
+    index,
+    shiftKey
+  );
+
+  selectedPages = result.selected;
+  lastSelectedIndex = result.anchorIndex;
+  selectionBeforeShift = result.baselineSelection;
+
+  if (isRangeUpdate) {
+    // A range may have touched many cards; re-render is simplest and correct.
+    updatePageDisplay();
+  } else {
+    // Only one card's selection changed; patch it directly.
+    updateSelectionCardUI(index);
+  }
+}
+
+function updateSelectionCardUI(index: number) {
   const pagesContainer = document.getElementById('pages-container');
   if (!pagesContainer) return;
 
@@ -870,11 +897,15 @@ function toggleSelectOptimized(index: number) {
 function selectAll() {
   selectedPages.clear();
   allPages.forEach((_, index) => selectedPages.add(index));
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   updatePageDisplay();
 }
 
 function deselectAll() {
   selectedPages.clear();
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   updatePageDisplay();
 }
 
@@ -1427,7 +1458,7 @@ function updatePageDisplay() {
         // Update click handler to use new index
         (selectBtn as HTMLElement).onclick = (e) => {
           e.stopPropagation();
-          toggleSelectOptimized(index);
+          handlePageSelectClick(index, (e as MouseEvent).shiftKey);
         };
       }
 
@@ -1525,7 +1556,7 @@ function updatePageNumbers() {
     if (selectBtn) {
       selectBtn.onclick = (e) => {
         e.stopPropagation();
-        toggleSelectOptimized(index);
+        handlePageSelectClick(index, (e as MouseEvent).shiftKey);
       };
     }
 
