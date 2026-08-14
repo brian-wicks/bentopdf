@@ -682,14 +682,17 @@ function createPageElement(
 
   const preview = document.createElement('div');
   preview.className =
-    'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+    'page-preview bg-gray-700 rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
   preview.onclick = (e) => {
     handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
   };
 
   if (canvas) {
     const previewCanvas = canvas;
-    previewCanvas.className = 'max-w-full max-h-full object-contain';
+    // bg-white sits directly on the canvas (not the container) so the
+    // white "page" only covers the page's own rendered size/aspect
+    // ratio, instead of filling the whole preview box.
+    previewCanvas.className = 'max-w-full max-h-full object-contain bg-white';
 
     previewCanvas.style.transform = `rotate(${pageData.visualRotation}deg)`;
     previewCanvas.style.transition = 'transform 0.2s ease';
@@ -707,7 +710,6 @@ function createPageElement(
     loadingLabel.textContent = t('common.loading');
     loading.append(loadingIcon, loadingLabel);
     preview.appendChild(loading);
-    preview.classList.add('bg-gray-700'); // Darker background for loading
   }
 
   // Page info
@@ -1051,7 +1053,7 @@ function rotatePage(index: number, delta: number) {
   if (!card) return;
 
   const canvas = card.querySelector('canvas');
-  const preview = card.querySelector('.bg-white');
+  const preview = card.querySelector('.page-preview');
 
   if (canvas && preview) {
     canvas.style.transform = `rotate(${pageData.visualRotation}deg)`;
@@ -1167,17 +1169,16 @@ async function handleInsertPdf(e: Event) {
           `div[data-page-index="${globalIndex}"]`
         );
         if (card) {
-          const preview =
-            card.querySelector('.bg-gray-700') ||
-            card.querySelector('.bg-white');
+          const preview = card.querySelector('.page-preview');
           if (preview) {
             // Re-create the preview content
             preview.innerHTML = '';
             preview.className =
-              'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+              'page-preview bg-gray-700 rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
 
             const previewCanvas = canvas;
-            previewCanvas.className = 'max-w-full max-h-full object-contain';
+            previewCanvas.className =
+              'max-w-full max-h-full object-contain bg-white';
             previewCanvas.style.transform = `rotate(${allPages[globalIndex].visualRotation}deg)`;
             previewCanvas.style.transition = 'transform 0.2s ease';
             preview.appendChild(previewCanvas);
@@ -1591,7 +1592,7 @@ function updatePageDisplay() {
       }
 
       // Update preview-pane click handler to use new index
-      const preview = card.querySelector('.bg-white') as HTMLElement | null;
+      const preview = card.querySelector('.page-preview') as HTMLElement | null;
       if (preview) {
         preview.onclick = (e) => {
           handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
