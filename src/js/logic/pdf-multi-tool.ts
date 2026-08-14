@@ -19,6 +19,7 @@ import {
   type PageSelectClickMode,
 } from '../utils/page-range-select.js';
 import { moveSelectedPages } from '../utils/move-selected-pages.js';
+import { isSelectionDragSnapPoint } from '../utils/selection-drag-snap.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -851,6 +852,27 @@ function setupSortable() {
     scroll: document.getElementById('main-scroll-container'),
     scrollSensitivity: 100, // Increase sensitivity for smoother scrolling
     bubbleScroll: false, // Prevent bubbling scroll to parent
+    onMove: (evt) => {
+      // Dragging one of several selected pages: the other selected pages
+      // are invisible mid-flight (see the fly-in animation) but still sit
+      // in the grid, so hovering over each one individually would
+      // otherwise make the live reorder preview jitter between every gap
+      // they leave behind. Only let the preview snap to the start/end of
+      // each contiguous run of selected pages.
+      const draggedIndex = Number(evt.dragged.dataset.pageIndex);
+      if (
+        Number.isNaN(draggedIndex) ||
+        selectedPages.size <= 1 ||
+        !selectedPages.has(draggedIndex)
+      ) {
+        return true;
+      }
+
+      const relatedIndex = Number(evt.related.dataset.pageIndex);
+      if (Number.isNaN(relatedIndex)) return true;
+
+      return isSelectionDragSnapPoint(selectedPages, relatedIndex);
+    },
     onChoose: () => {
       // Start of a new mouse-down gesture: reset the drag flag so a plain
       // click is never mistaken for the tail end of a previous drag.
