@@ -14,7 +14,10 @@ import { initializeGlobalShortcuts } from '../utils/shortcuts-init.js';
 import { repairPdfFile } from './repair-pdf.js';
 import { partitionIncomingFiles } from '../utils/multi-tool-file-input.js';
 import { convertImagesToPdfFile } from '../utils/images-to-pdf-lib.js';
-import { applyPageSelectClick } from '../utils/page-range-select.js';
+import {
+  applyPageSelectClick,
+  type PageSelectClickMode,
+} from '../utils/page-range-select.js';
 import { moveSelectedPages } from '../utils/move-selected-pages.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -45,6 +48,12 @@ let allPages: PageData[] = [];
 let selectedPages: Set<number> = new Set();
 let lastSelectedIndex: number | null = null;
 let selectionBeforeShift: Set<number> | null = null;
+// True once a mouse-down-to-mouse-up gesture has crossed the drag
+// threshold (SortableJS's onStart). The browser still fires a native
+// "click" on mouseup even after a short drag, so click handlers check
+// this to avoid toggling a page's selection as a side effect of
+// dragging it.
+let dragJustHappened = false;
 let currentPdfDocs: PDFLibDocument[] = [];
 let splitMarkers: Set<number> = new Set();
 let isRendering = false;
@@ -673,6 +682,9 @@ function createPageElement(
   const preview = document.createElement('div');
   preview.className =
     'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+  preview.onclick = (e) => {
+    handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
+  };
 
   if (canvas) {
     const previewCanvas = canvas;
@@ -839,11 +851,19 @@ function setupSortable() {
     scroll: document.getElementById('main-scroll-container'),
     scrollSensitivity: 100, // Increase sensitivity for smoother scrolling
     bubbleScroll: false, // Prevent bubbling scroll to parent
+    onChoose: () => {
+      // Start of a new mouse-down gesture: reset the drag flag so a plain
+      // click is never mistaken for the tail end of a previous drag.
+      dragJustHappened = false;
+    },
     onStart: (evt) => {
-      // Actual dragging has begun (past the move threshold) for a page
-      // that's part of a multi-page selection: style the drag ghost (the
-      // clone SortableJS already created for this event) with a
-      // bunched-stack look and a count badge, signaling the whole
+      // Actual dragging has begun (past the move threshold). Mark it so
+      // the click event that follows mouseup doesn't toggle selection.
+      dragJustHappened = true;
+
+      // If the dragged page is part of a multi-page selection, style the
+      // drag ghost (the clone SortableJS already created for this event)
+      // with a bunched-stack look and a count badge, signaling the whole
       // selection is moving. Using onStart rather than onChoose keeps a
       // plain click (selecting a page) from ever triggering this.
       const index = evt.oldIndex;
@@ -909,9 +929,26 @@ function setupSortable() {
   });
 }
 
-function handlePageSelectClick(index: number, shiftKey: boolean) {
-  const isRangeUpdate =
-    shiftKey && lastSelectedIndex !== null && selectionBeforeShift !== null;
+// A plain click on a page's preview selects only that page; holding
+// ctrl (or cmd on Mac) toggles it into/out of the current selection instead,
+// matching standard OS multi-select conventions.
+function previewClickMode(e: MouseEvent): PageSelectClickMode {
+  return e.ctrlKey || e.metaKey ? 'toggle' : 'exclusive';
+}
+
+function handlePageSelectClick(
+  index: number,
+  shiftKey: boolean,
+  mode: PageSelectClickMode = 'toggle'
+) {
+  // This click is the tail end of a drag gesture (SortableJS still fires a
+  // native click on mouseup even after a short drag) -- don't let it also
+  // toggle the page's selection.
+  if (dragJustHappened) return;
+
+  const isBulkUpdate =
+    (shiftKey && lastSelectedIndex !== null && selectionBeforeShift !== null) ||
+    mode === 'exclusive';
 
   const result = applyPageSelectClick(
     {
@@ -920,15 +957,17 @@ function handlePageSelectClick(index: number, shiftKey: boolean) {
       baselineSelection: selectionBeforeShift,
     },
     index,
-    shiftKey
+    shiftKey,
+    mode
   );
 
   selectedPages = result.selected;
   lastSelectedIndex = result.anchorIndex;
   selectionBeforeShift = result.baselineSelection;
 
-  if (isRangeUpdate) {
-    // A range may have touched many cards; re-render is simplest and correct.
+  if (isBulkUpdate) {
+    // A range, or an exclusive select, may touch many cards; re-render is
+    // simplest and correct.
     updatePageDisplay();
   } else {
     // Only one card's selection changed; patch it directly.
@@ -1526,6 +1565,14 @@ function updatePageDisplay() {
         (selectBtn as HTMLElement).onclick = (e) => {
           e.stopPropagation();
           handlePageSelectClick(index, (e as MouseEvent).shiftKey);
+        };
+      }
+
+      // Update preview-pane click handler to use new index
+      const preview = card.querySelector('.bg-white') as HTMLElement | null;
+      if (preview) {
+        preview.onclick = (e) => {
+          handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
         };
       }
 

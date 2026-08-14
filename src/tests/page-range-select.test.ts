@@ -186,4 +186,62 @@ describe('applyPageSelectClick', () => {
     result.selected.add(99);
     expect(baselineSelection.has(99)).toBe(false);
   });
+
+  describe('exclusive mode (plain click on the page preview)', () => {
+    it('selects only the clicked page, clearing any other selection', () => {
+      const state: PageSelectionState = {
+        selected: new Set([1, 2, 5]),
+        anchorIndex: 1,
+        baselineSelection: new Set([1, 2, 5]),
+      };
+      const result = applyPageSelectClick(state, 3, false, 'exclusive');
+      expect([...result.selected]).toEqual([3]);
+      expect(result.anchorIndex).toBe(3);
+      expect([...result.baselineSelection]).toEqual([3]);
+    });
+
+    it('clicking an already-selected page keeps only that page selected (not a toggle-off)', () => {
+      const state: PageSelectionState = {
+        selected: new Set([1, 2, 3]),
+        anchorIndex: 1,
+        baselineSelection: new Set([1, 2, 3]),
+      };
+      const result = applyPageSelectClick(state, 2, false, 'exclusive');
+      expect([...result.selected]).toEqual([2]);
+    });
+
+    it('sets the clicked page as the new anchor for a following shift+click', () => {
+      let state: PageSelectionState = {
+        selected: new Set([5, 6]),
+        anchorIndex: 5,
+        baselineSelection: new Set([5, 6]),
+      };
+      state = applyPageSelectClick(state, 1, false, 'exclusive');
+      const shiftResult = applyPageSelectClick(state, 4, true);
+      expect([...shiftResult.selected].sort((a, b) => a - b)).toEqual([
+        1, 2, 3, 4,
+      ]);
+    });
+
+    it('ctrl/cmd-click (mode toggle) adds the page without clearing the rest, unlike a plain exclusive click', () => {
+      const state: PageSelectionState = {
+        selected: new Set([1, 2]),
+        anchorIndex: 1,
+        baselineSelection: new Set([1, 2]),
+      };
+      const result = applyPageSelectClick(state, 5, false, 'toggle');
+      expect([...result.selected].sort((a, b) => a - b)).toEqual([1, 2, 5]);
+    });
+
+    it('shift+click still takes priority over exclusive mode', () => {
+      let state: PageSelectionState = {
+        selected: new Set(),
+        anchorIndex: null,
+        baselineSelection: null,
+      };
+      state = applyPageSelectClick(state, 2, false, 'exclusive');
+      const result = applyPageSelectClick(state, 5, true, 'exclusive');
+      expect([...result.selected].sort((a, b) => a - b)).toEqual([2, 3, 4, 5]);
+    });
+  });
 });
