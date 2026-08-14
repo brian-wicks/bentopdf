@@ -234,6 +234,73 @@ input[type='file']::file-selector-button {
   cursor: grabbing;
 }
 
+/* Dragging one of several selected pages: make the drag ghost (a clone of
+   the grabbed card) look like a bunch of pages lifted together, with a
+   count badge. Excluded on the placeholder left behind in the grid
+   (.sortable-ghost) so only the floating clone gets the effect. */
+.multi-drag-fallback:not(.sortable-ghost)::before,
+.multi-drag-fallback:not(.sortable-ghost)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #1f2937;
+  /* gray-800, matches card background */
+  border: 2px solid #374151;
+  /* gray-700, matches card border */
+}
+
+.multi-drag-fallback:not(.sortable-ghost)::before {
+  transform: rotate(-6deg) translate(-4px, 6px);
+}
+
+.multi-drag-fallback:not(.sortable-ghost)::after {
+  transform: rotate(5deg) translate(5px, 8px);
+}
+
+.sortable-ghost .multi-drag-count-badge {
+  display: none;
+}
+
+.multi-drag-count-badge {
+  position: absolute;
+  top: -0.6rem;
+  right: -0.6rem;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #4f46e5;
+  /* indigo-600 */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* The rest of a multi-page selection, left behind in the grid while one of
+   them is dragged: fly up into the grabbed card's spot (under the cursor),
+   as if joining the bunched-stack ghost, then vanish. The transition lives
+   only on this class (not a shared rule) so it can never affect the drag
+   ghost's own per-frame position updates. --multi-drag-dx/dy are set
+   per-card in JS before the class is added. */
+.multi-drag-companion {
+  position: relative;
+  z-index: 30;
+  transition:
+    transform 0.16s ease-in,
+    opacity 0.16s ease-in;
+  transform: translate(var(--multi-drag-dx, 0), var(--multi-drag-dy, 0))
+    scale(0.4);
+  opacity: 0;
+}
+
 .compare-viewer-wrapper.overlay-mode {
   position: relative;
   width: 100%;

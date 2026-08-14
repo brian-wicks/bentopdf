@@ -15,6 +15,7 @@ import { repairPdfFile } from './repair-pdf.js';
 import { partitionIncomingFiles } from '../utils/multi-tool-file-input.js';
 import { convertImagesToPdfFile } from '../utils/images-to-pdf-lib.js';
 import { applyPageSelectClick } from '../utils/page-range-select.js';
+import { moveSelectedPages } from '../utils/move-selected-pages.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -631,6 +632,14 @@ async function loadPdfs(files: File[]) {
   }
 }
 
+function createMultiDragBadge(count: number): HTMLElement {
+  const badge = document.createElement('span');
+  badge.className = 'multi-drag-count-badge';
+  badge.dataset.multiDragBadge = 'true';
+  badge.textContent = String(count);
+  return badge;
+}
+
 // Modified to return the element instead of appending it
 function createPageElement(
   canvas: HTMLCanvasElement | null,
@@ -830,13 +839,71 @@ function setupSortable() {
     scroll: document.getElementById('main-scroll-container'),
     scrollSensitivity: 100, // Increase sensitivity for smoother scrolling
     bubbleScroll: false, // Prevent bubbling scroll to parent
+    onStart: (evt) => {
+      // Actual dragging has begun (past the move threshold) for a page
+      // that's part of a multi-page selection: style the drag ghost (the
+      // clone SortableJS already created for this event) with a
+      // bunched-stack look and a count badge, signaling the whole
+      // selection is moving. Using onStart rather than onChoose keeps a
+      // plain click (selecting a page) from ever triggering this.
+      const index = evt.oldIndex;
+      if (index === undefined || selectedPages.size <= 1) return;
+      if (!selectedPages.has(index)) return;
+
+      const ghost = Sortable.ghost as HTMLElement | null;
+      if (ghost) {
+        ghost.classList.add('multi-drag-fallback');
+        ghost.appendChild(createMultiDragBadge(selectedPages.size));
+      }
+
+      // Fly the rest of the selection up into the grabbed card's spot
+      // (under the cursor), as if joining the stack that's about to be
+      // dragged, so it reads as the whole selection moving together.
+      const pagesContainer = document.getElementById('pages-container');
+      if (!pagesContainer) return;
+
+      const targetRect = evt.item.getBoundingClientRect();
+      const targetX = targetRect.left + targetRect.width / 2;
+      const targetY = targetRect.top + targetRect.height / 2;
+
+      selectedPages.forEach((i) => {
+        if (i === index) return;
+        const card = pagesContainer.children[i] as HTMLElement | undefined;
+        if (!card) return;
+
+        const rect = card.getBoundingClientRect();
+        const dx = targetX - (rect.left + rect.width / 2);
+        const dy = targetY - (rect.top + rect.height / 2);
+        card.style.setProperty('--multi-drag-dx', `${dx}px`);
+        card.style.setProperty('--multi-drag-dy', `${dy}px`);
+        card.classList.add('multi-drag-companion');
+      });
+    },
+    onUnchoose: () => {
+      document.querySelectorAll('.multi-drag-companion').forEach((el) => {
+        el.classList.remove('multi-drag-companion');
+        (el as HTMLElement).style.removeProperty('--multi-drag-dx');
+        (el as HTMLElement).style.removeProperty('--multi-drag-dy');
+      });
+    },
     onEnd: (evt) => {
       const oldIndex = evt.oldIndex!;
       const newIndex = evt.newIndex!;
       if (oldIndex !== newIndex) {
-        const [moved] = allPages.splice(oldIndex, 1);
-        allPages.splice(newIndex, 0, moved);
-        updatePageNumbers();
+        // If the dragged page is part of a multi-page selection, carry the
+        // whole selection along as one block instead of moving just the
+        // single page SortableJS physically dragged.
+        const result = moveSelectedPages(
+          allPages,
+          selectedPages,
+          oldIndex,
+          newIndex
+        );
+        allPages = result.items;
+        selectedPages = result.selectedIndices;
+        lastSelectedIndex = null;
+        selectionBeforeShift = null;
+        updatePageDisplay();
       }
     },
   });
@@ -1529,78 +1596,4 @@ function updatePageDisplay() {
   setupSortable();
   renderSplitMarkers();
   createIcons({ icons });
-}
-
-function updatePageNumbers() {
-  const pagesContainer = document.getElementById('pages-container');
-  if (!pagesContainer) return;
-
-  const cards = Array.from(pagesContainer.children) as HTMLElement[];
-  cards.forEach((card, index) => {
-    // Update data attribute
-    card.dataset.pageIndex = index.toString();
-
-    // Update visible page number text
-    const info = card.querySelector('.text-xs.text-gray-400.text-center.mb-2');
-    if (info) {
-      info.textContent = `Page ${index + 1} `;
-    }
-
-    // Re-attach event listeners for buttons
-    // We need to find the buttons and update their onclick handlers
-    // This is necessary because the original handlers captured the old index
-
-    const selectBtn = card.querySelector(
-      'button[class*="absolute top-2 right-2"]'
-    ) as HTMLButtonElement;
-    if (selectBtn) {
-      selectBtn.onclick = (e) => {
-        e.stopPropagation();
-        handlePageSelectClick(index, (e as MouseEvent).shiftKey);
-      };
-    }
-
-    const actionsInner = card.querySelector(
-      '.flex.items-center.gap-1.bg-gray-900\\/90'
-    );
-    if (actionsInner) {
-      const buttons = actionsInner.querySelectorAll('button');
-      // Order: Rotate Left, Rotate Right, Duplicate, Insert, Split, Delete
-      if (buttons[0])
-        buttons[0].onclick = (e) => {
-          e.stopPropagation();
-          rotatePage(index, -90);
-        };
-      if (buttons[1])
-        buttons[1].onclick = (e) => {
-          e.stopPropagation();
-          rotatePage(index, 90);
-        };
-      if (buttons[2])
-        buttons[2].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          duplicatePage(index);
-        };
-      if (buttons[3])
-        buttons[3].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          insertPdfAfter(index);
-        };
-      if (buttons[4])
-        buttons[4].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          toggleSplitMarker(index);
-          renderSplitMarkers();
-        };
-      if (buttons[5])
-        buttons[5].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          deletePage(index);
-        };
-    }
-  });
 }
