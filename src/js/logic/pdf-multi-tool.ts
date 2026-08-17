@@ -1,5 +1,10 @@
 import { createIcons, icons } from 'lucide';
-import { degrees, PDFDocument as PDFLibDocument, PDFPage } from 'pdf-lib';
+import {
+  degrees,
+  PageSizes,
+  PDFDocument as PDFLibDocument,
+  PDFPage,
+} from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import Sortable from 'sortablejs';
@@ -14,6 +19,12 @@ import { initializeGlobalShortcuts } from '../utils/shortcuts-init.js';
 import { repairPdfFile } from './repair-pdf.js';
 import { partitionIncomingFiles } from '../utils/multi-tool-file-input.js';
 import { convertImagesToPdfFile } from '../utils/images-to-pdf-lib.js';
+import {
+  applyPageSelectClick,
+  type PageSelectClickMode,
+} from '../utils/page-range-select.js';
+import { moveSelectedPages } from '../utils/move-selected-pages.js';
+import { isSelectionDragSnapPoint } from '../utils/selection-drag-snap.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -41,6 +52,14 @@ function generateId(): string {
 
 let allPages: PageData[] = [];
 let selectedPages: Set<number> = new Set();
+let lastSelectedIndex: number | null = null;
+let selectionBeforeShift: Set<number> | null = null;
+// True once a mouse-down-to-mouse-up gesture has crossed the drag
+// threshold (SortableJS's onStart). The browser still fires a native
+// "click" on mouseup even after a short drag, so click handlers check
+// this to avoid toggling a page's selection as a side effect of
+// dragging it.
+let dragJustHappened = false;
 let currentPdfDocs: PDFLibDocument[] = [];
 let splitMarkers: Set<number> = new Set();
 let isRendering = false;
@@ -73,6 +92,8 @@ function restore(snap: Snapshot) {
     canvas: p.canvas,
   }));
   selectedPages = new Set(snap.selectedPages);
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   splitMarkers = new Set(snap.splitMarkers);
   updatePageDisplay();
 }
@@ -290,6 +311,20 @@ function initializeTool() {
       await downloadAll();
     });
   });
+  document.getElementById('export-a3-btn')?.addEventListener('click', () => {
+    if (isRendering) return;
+    if (selectedPages.size === 0) {
+      showModal(
+        t('multiTool.noPagesSelected'),
+        t('multiTool.selectOnePage'),
+        'info'
+      );
+      return;
+    }
+    withButtonLoading('export-a3-btn', async () => {
+      await exportPagesAsA3(Array.from(selectedPages).sort((a, b) => a - b));
+    });
+  });
   document
     .getElementById('add-blank-page-btn')
     ?.addEventListener('click', () => {
@@ -460,6 +495,8 @@ function resetAll() {
   snapshot();
   allPages = [];
   selectedPages.clear();
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   splitMarkers.clear();
   currentPdfDocs = [];
   pageCanvasCache.clear();
@@ -624,6 +661,14 @@ async function loadPdfs(files: File[]) {
   }
 }
 
+function createMultiDragBadge(count: number): HTMLElement {
+  const badge = document.createElement('span');
+  badge.className = 'multi-drag-count-badge';
+  badge.dataset.multiDragBadge = 'true';
+  badge.textContent = String(count);
+  return badge;
+}
+
 // Modified to return the element instead of appending it
 function createPageElement(
   canvas: HTMLCanvasElement | null,
@@ -637,7 +682,7 @@ function createPageElement(
 
   const card = document.createElement('div');
   card.className =
-    'bg-gray-800 rounded-lg border-2 border-gray-700 p-2 relative group cursor-move';
+    'bg-gray-800 rounded-lg border-2 border-gray-700 p-2 relative group cursor-pointer';
   card.dataset.pageIndex = index.toString();
   card.dataset.pageId = pageData.id; // Set ID for reconciliation
 
@@ -656,11 +701,17 @@ function createPageElement(
 
   const preview = document.createElement('div');
   preview.className =
-    'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+    'page-preview bg-gray-700 rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+  preview.onclick = (e) => {
+    handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
+  };
 
   if (canvas) {
     const previewCanvas = canvas;
-    previewCanvas.className = 'max-w-full max-h-full object-contain';
+    // bg-white sits directly on the canvas (not the container) so the
+    // white "page" only covers the page's own rendered size/aspect
+    // ratio, instead of filling the whole preview box.
+    previewCanvas.className = 'max-w-full max-h-full object-contain bg-white';
 
     previewCanvas.style.transform = `rotate(${pageData.visualRotation}deg)`;
     previewCanvas.style.transition = 'transform 0.2s ease';
@@ -678,7 +729,6 @@ function createPageElement(
     loadingLabel.textContent = t('common.loading');
     loading.append(loadingIcon, loadingLabel);
     preview.appendChild(loading);
-    preview.classList.add('bg-gray-700'); // Darker background for loading
   }
 
   // Page info
@@ -711,7 +761,7 @@ function createPageElement(
   selectBtn.appendChild(selectIcon);
   selectBtn.onclick = (e) => {
     e.stopPropagation();
-    toggleSelectOptimized(index);
+    handlePageSelectClick(index, (e as MouseEvent).shiftKey);
   };
 
   // Rotate button
@@ -823,26 +873,152 @@ function setupSortable() {
     scroll: document.getElementById('main-scroll-container'),
     scrollSensitivity: 100, // Increase sensitivity for smoother scrolling
     bubbleScroll: false, // Prevent bubbling scroll to parent
+    onMove: (evt) => {
+      // Dragging one of several selected pages: the other selected pages
+      // are invisible mid-flight (see the fly-in animation) but still sit
+      // in the grid, so hovering over each one individually would
+      // otherwise make the live reorder preview jitter between every gap
+      // they leave behind. Only let the preview snap to the start/end of
+      // each contiguous run of selected pages.
+      const draggedIndex = Number(evt.dragged.dataset.pageIndex);
+      if (
+        Number.isNaN(draggedIndex) ||
+        selectedPages.size <= 1 ||
+        !selectedPages.has(draggedIndex)
+      ) {
+        return true;
+      }
+
+      const relatedIndex = Number(evt.related.dataset.pageIndex);
+      if (Number.isNaN(relatedIndex)) return true;
+
+      return isSelectionDragSnapPoint(selectedPages, relatedIndex);
+    },
+    onChoose: () => {
+      // Start of a new mouse-down gesture: reset the drag flag so a plain
+      // click is never mistaken for the tail end of a previous drag.
+      dragJustHappened = false;
+    },
+    onStart: (evt) => {
+      // Actual dragging has begun (past the move threshold). Mark it so
+      // the click event that follows mouseup doesn't toggle selection.
+      dragJustHappened = true;
+
+      // If the dragged page is part of a multi-page selection, style the
+      // drag ghost (the clone SortableJS already created for this event)
+      // with a bunched-stack look and a count badge, signaling the whole
+      // selection is moving. Using onStart rather than onChoose keeps a
+      // plain click (selecting a page) from ever triggering this.
+      const index = evt.oldIndex;
+      if (index === undefined || selectedPages.size <= 1) return;
+      if (!selectedPages.has(index)) return;
+
+      const ghost = Sortable.ghost as HTMLElement | null;
+      if (ghost) {
+        ghost.classList.add('multi-drag-fallback');
+        ghost.appendChild(createMultiDragBadge(selectedPages.size));
+      }
+
+      // Fly the rest of the selection up into the grabbed card's spot
+      // (under the cursor), as if joining the stack that's about to be
+      // dragged, so it reads as the whole selection moving together.
+      const pagesContainer = document.getElementById('pages-container');
+      if (!pagesContainer) return;
+
+      const targetRect = evt.item.getBoundingClientRect();
+      const targetX = targetRect.left + targetRect.width / 2;
+      const targetY = targetRect.top + targetRect.height / 2;
+
+      selectedPages.forEach((i) => {
+        if (i === index) return;
+        const card = pagesContainer.children[i] as HTMLElement | undefined;
+        if (!card) return;
+
+        const rect = card.getBoundingClientRect();
+        const dx = targetX - (rect.left + rect.width / 2);
+        const dy = targetY - (rect.top + rect.height / 2);
+        card.style.setProperty('--multi-drag-dx', `${dx}px`);
+        card.style.setProperty('--multi-drag-dy', `${dy}px`);
+        card.classList.add('multi-drag-companion');
+      });
+    },
+    onUnchoose: () => {
+      document.querySelectorAll('.multi-drag-companion').forEach((el) => {
+        el.classList.remove('multi-drag-companion');
+        (el as HTMLElement).style.removeProperty('--multi-drag-dx');
+        (el as HTMLElement).style.removeProperty('--multi-drag-dy');
+      });
+    },
     onEnd: (evt) => {
       const oldIndex = evt.oldIndex!;
       const newIndex = evt.newIndex!;
       if (oldIndex !== newIndex) {
-        const [moved] = allPages.splice(oldIndex, 1);
-        allPages.splice(newIndex, 0, moved);
-        updatePageNumbers();
+        // If the dragged page is part of a multi-page selection, carry the
+        // whole selection along as one block instead of moving just the
+        // single page SortableJS physically dragged.
+        const result = moveSelectedPages(
+          allPages,
+          selectedPages,
+          oldIndex,
+          newIndex
+        );
+        allPages = result.items;
+        selectedPages = result.selectedIndices;
+        lastSelectedIndex = null;
+        selectionBeforeShift = null;
+        updatePageDisplay();
       }
     },
   });
 }
 
-function toggleSelectOptimized(index: number) {
-  if (selectedPages.has(index)) {
-    selectedPages.delete(index);
-  } else {
-    selectedPages.add(index);
-  }
+// A plain click on a page's preview selects only that page; holding
+// ctrl (or cmd on Mac) toggles it into/out of the current selection instead,
+// matching standard OS multi-select conventions.
+function previewClickMode(e: MouseEvent): PageSelectClickMode {
+  return e.ctrlKey || e.metaKey ? 'toggle' : 'exclusive';
+}
 
-  // Only update the specific card instead of re-rendering everything
+function handlePageSelectClick(
+  index: number,
+  shiftKey: boolean,
+  mode: PageSelectClickMode = 'toggle'
+) {
+  // This click is the tail end of a drag gesture (SortableJS still fires a
+  // native click on mouseup even after a short drag) -- don't let it also
+  // toggle the page's selection.
+  if (dragJustHappened) return;
+
+  const isBulkUpdate =
+    (shiftKey && lastSelectedIndex !== null && selectionBeforeShift !== null) ||
+    mode === 'exclusive';
+
+  const result = applyPageSelectClick(
+    {
+      selected: selectedPages,
+      anchorIndex: lastSelectedIndex,
+      baselineSelection: selectionBeforeShift,
+    },
+    index,
+    shiftKey,
+    mode
+  );
+
+  selectedPages = result.selected;
+  lastSelectedIndex = result.anchorIndex;
+  selectionBeforeShift = result.baselineSelection;
+
+  if (isBulkUpdate) {
+    // A range, or an exclusive select, may touch many cards; re-render is
+    // simplest and correct.
+    updatePageDisplay();
+  } else {
+    // Only one card's selection changed; patch it directly.
+    updateSelectionCardUI(index);
+  }
+}
+
+function updateSelectionCardUI(index: number) {
   const pagesContainer = document.getElementById('pages-container');
   if (!pagesContainer) return;
 
@@ -870,11 +1046,15 @@ function toggleSelectOptimized(index: number) {
 function selectAll() {
   selectedPages.clear();
   allPages.forEach((_, index) => selectedPages.add(index));
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   updatePageDisplay();
 }
 
 function deselectAll() {
   selectedPages.clear();
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
   updatePageDisplay();
 }
 
@@ -892,7 +1072,7 @@ function rotatePage(index: number, delta: number) {
   if (!card) return;
 
   const canvas = card.querySelector('canvas');
-  const preview = card.querySelector('.bg-white');
+  const preview = card.querySelector('.page-preview');
 
   if (canvas && preview) {
     canvas.style.transform = `rotate(${pageData.visualRotation}deg)`;
@@ -1008,17 +1188,16 @@ async function handleInsertPdf(e: Event) {
           `div[data-page-index="${globalIndex}"]`
         );
         if (card) {
-          const preview =
-            card.querySelector('.bg-gray-700') ||
-            card.querySelector('.bg-white');
+          const preview = card.querySelector('.page-preview');
           if (preview) {
             // Re-create the preview content
             preview.innerHTML = '';
             preview.className =
-              'bg-white rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
+              'page-preview bg-gray-700 rounded mb-2 overflow-hidden w-full flex items-center justify-center relative h-36 sm:h-64';
 
             const previewCanvas = canvas;
-            previewCanvas.className = 'max-w-full max-h-full object-contain';
+            previewCanvas.className =
+              'max-w-full max-h-full object-contain bg-white';
             previewCanvas.style.transform = `rotate(${allPages[globalIndex].visualRotation}deg)`;
             previewCanvas.style.transition = 'transform 0.2s ease';
             preview.appendChild(previewCanvas);
@@ -1369,6 +1548,82 @@ async function downloadPagesAsPdf(indices: number[], filename: string) {
   }
 }
 
+// Imposes the given pages 2-up onto A3 landscape sheets (N-up style) and
+// downloads the result. Blank multi-tool pages keep their slot in the
+// pairing but draw nothing, so pairing stays aligned with what's on screen.
+async function exportPagesAsA3(indices: number[]) {
+  try {
+    const newPdf = await PDFLibDocument.create();
+    const [sheetWidth, sheetHeight] = [PageSizes.A3[1], PageSizes.A3[0]]; // A3 landscape
+    const cols = 2;
+    const cellWidth = sheetWidth / cols;
+    const cellHeight = sheetHeight;
+
+    for (let i = 0; i < indices.length; i += cols) {
+      const chunk = indices.slice(i, i + cols);
+      const outputPage = newPdf.addPage([sheetWidth, sheetHeight]);
+
+      for (let j = 0; j < chunk.length; j++) {
+        const pageData = allPages[chunk[j]];
+        if (!pageData?.pdfDoc || pageData.originalPageIndex < 0) continue;
+
+        const sourcePage = pageData.pdfDoc.getPage(pageData.originalPageIndex);
+        const rotation =
+          (((sourcePage.getRotation().angle + pageData.rotation) % 360) + 360) %
+          360;
+
+        const embeddedPage = await newPdf.embedPage(sourcePage);
+        const { width, height } = embeddedPage.scale(1);
+        const isSideways = rotation === 90 || rotation === 270;
+        const effectiveWidth = isSideways ? height : width;
+        const effectiveHeight = isSideways ? width : height;
+
+        const scale = Math.min(
+          cellWidth / effectiveWidth,
+          cellHeight / effectiveHeight
+        );
+        const drawWidth = width * scale;
+        const drawHeight = height * scale;
+
+        // drawPage's `rotate` option spins the page around the (x, y)
+        // anchor as if it were the box's un-rotated bottom-left corner,
+        // not its visual one -- so the anchor has to be solved backwards
+        // from where we actually want the box's center to land.
+        const cellCenterX = j * cellWidth + cellWidth / 2;
+        const cellCenterY = cellHeight / 2;
+        const angleRad = (rotation * Math.PI) / 180;
+        const x =
+          cellCenterX -
+          ((drawWidth / 2) * Math.cos(angleRad) -
+            (drawHeight / 2) * Math.sin(angleRad));
+        const y =
+          cellCenterY -
+          ((drawWidth / 2) * Math.sin(angleRad) +
+            (drawHeight / 2) * Math.cos(angleRad));
+
+        outputPage.drawPage(embeddedPage, {
+          x,
+          y,
+          width: drawWidth,
+          height: drawHeight,
+          rotate: degrees(rotation),
+        });
+      }
+    }
+
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([new Uint8Array(pdfBytes)], {
+      type: 'application/pdf',
+    });
+
+    downloadFile(blob, 'export-a3.pdf');
+    showModal('Success', t('multiTool.a3ExportSuccess'), 'success');
+  } catch (e) {
+    console.error('Failed to create A3 PDF:', e);
+    showModal('Error', t('multiTool.a3ExportError'), 'error');
+  }
+}
+
 function updatePageDisplay() {
   const pagesContainer = document.getElementById('pages-container');
   if (!pagesContainer) return;
@@ -1427,7 +1682,15 @@ function updatePageDisplay() {
         // Update click handler to use new index
         (selectBtn as HTMLElement).onclick = (e) => {
           e.stopPropagation();
-          toggleSelectOptimized(index);
+          handlePageSelectClick(index, (e as MouseEvent).shiftKey);
+        };
+      }
+
+      // Update preview-pane click handler to use new index
+      const preview = card.querySelector('.page-preview') as HTMLElement | null;
+      if (preview) {
+        preview.onclick = (e) => {
+          handlePageSelectClick(index, e.shiftKey, previewClickMode(e));
         };
       }
 
@@ -1498,78 +1761,4 @@ function updatePageDisplay() {
   setupSortable();
   renderSplitMarkers();
   createIcons({ icons });
-}
-
-function updatePageNumbers() {
-  const pagesContainer = document.getElementById('pages-container');
-  if (!pagesContainer) return;
-
-  const cards = Array.from(pagesContainer.children) as HTMLElement[];
-  cards.forEach((card, index) => {
-    // Update data attribute
-    card.dataset.pageIndex = index.toString();
-
-    // Update visible page number text
-    const info = card.querySelector('.text-xs.text-gray-400.text-center.mb-2');
-    if (info) {
-      info.textContent = `Page ${index + 1} `;
-    }
-
-    // Re-attach event listeners for buttons
-    // We need to find the buttons and update their onclick handlers
-    // This is necessary because the original handlers captured the old index
-
-    const selectBtn = card.querySelector(
-      'button[class*="absolute top-2 right-2"]'
-    ) as HTMLButtonElement;
-    if (selectBtn) {
-      selectBtn.onclick = (e) => {
-        e.stopPropagation();
-        toggleSelectOptimized(index);
-      };
-    }
-
-    const actionsInner = card.querySelector(
-      '.flex.items-center.gap-1.bg-gray-900\\/90'
-    );
-    if (actionsInner) {
-      const buttons = actionsInner.querySelectorAll('button');
-      // Order: Rotate Left, Rotate Right, Duplicate, Insert, Split, Delete
-      if (buttons[0])
-        buttons[0].onclick = (e) => {
-          e.stopPropagation();
-          rotatePage(index, -90);
-        };
-      if (buttons[1])
-        buttons[1].onclick = (e) => {
-          e.stopPropagation();
-          rotatePage(index, 90);
-        };
-      if (buttons[2])
-        buttons[2].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          duplicatePage(index);
-        };
-      if (buttons[3])
-        buttons[3].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          insertPdfAfter(index);
-        };
-      if (buttons[4])
-        buttons[4].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          toggleSplitMarker(index);
-          renderSplitMarkers();
-        };
-      if (buttons[5])
-        buttons[5].onclick = (e) => {
-          e.stopPropagation();
-          snapshot();
-          deletePage(index);
-        };
-    }
-  });
 }
