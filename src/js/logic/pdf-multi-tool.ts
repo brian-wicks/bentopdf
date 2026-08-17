@@ -1,5 +1,10 @@
 import { createIcons, icons } from 'lucide';
-import { degrees, PDFDocument as PDFLibDocument, PDFPage } from 'pdf-lib';
+import {
+  degrees,
+  PageSizes,
+  PDFDocument as PDFLibDocument,
+  PDFPage,
+} from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import JSZip from 'jszip';
 import Sortable from 'sortablejs';
@@ -304,6 +309,20 @@ function initializeTool() {
     }
     withButtonLoading('export-pdf-btn', async () => {
       await downloadAll();
+    });
+  });
+  document.getElementById('export-a3-btn')?.addEventListener('click', () => {
+    if (isRendering) return;
+    if (selectedPages.size === 0) {
+      showModal(
+        t('multiTool.noPagesSelected'),
+        t('multiTool.selectOnePage'),
+        'info'
+      );
+      return;
+    }
+    withButtonLoading('export-a3-btn', async () => {
+      await exportPagesAsA3(Array.from(selectedPages).sort((a, b) => a - b));
     });
   });
   document
@@ -1526,6 +1545,82 @@ async function downloadPagesAsPdf(indices: number[], filename: string) {
   } catch (e) {
     console.error('Failed to create PDF:', e);
     showModal('Error', 'Failed to create PDF.', 'error');
+  }
+}
+
+// Imposes the given pages 2-up onto A3 landscape sheets (N-up style) and
+// downloads the result. Blank multi-tool pages keep their slot in the
+// pairing but draw nothing, so pairing stays aligned with what's on screen.
+async function exportPagesAsA3(indices: number[]) {
+  try {
+    const newPdf = await PDFLibDocument.create();
+    const [sheetWidth, sheetHeight] = [PageSizes.A3[1], PageSizes.A3[0]]; // A3 landscape
+    const cols = 2;
+    const cellWidth = sheetWidth / cols;
+    const cellHeight = sheetHeight;
+
+    for (let i = 0; i < indices.length; i += cols) {
+      const chunk = indices.slice(i, i + cols);
+      const outputPage = newPdf.addPage([sheetWidth, sheetHeight]);
+
+      for (let j = 0; j < chunk.length; j++) {
+        const pageData = allPages[chunk[j]];
+        if (!pageData?.pdfDoc || pageData.originalPageIndex < 0) continue;
+
+        const sourcePage = pageData.pdfDoc.getPage(pageData.originalPageIndex);
+        const rotation =
+          (((sourcePage.getRotation().angle + pageData.rotation) % 360) + 360) %
+          360;
+
+        const embeddedPage = await newPdf.embedPage(sourcePage);
+        const { width, height } = embeddedPage.scale(1);
+        const isSideways = rotation === 90 || rotation === 270;
+        const effectiveWidth = isSideways ? height : width;
+        const effectiveHeight = isSideways ? width : height;
+
+        const scale = Math.min(
+          cellWidth / effectiveWidth,
+          cellHeight / effectiveHeight
+        );
+        const drawWidth = width * scale;
+        const drawHeight = height * scale;
+
+        // drawPage's `rotate` option spins the page around the (x, y)
+        // anchor as if it were the box's un-rotated bottom-left corner,
+        // not its visual one -- so the anchor has to be solved backwards
+        // from where we actually want the box's center to land.
+        const cellCenterX = j * cellWidth + cellWidth / 2;
+        const cellCenterY = cellHeight / 2;
+        const angleRad = (rotation * Math.PI) / 180;
+        const x =
+          cellCenterX -
+          ((drawWidth / 2) * Math.cos(angleRad) -
+            (drawHeight / 2) * Math.sin(angleRad));
+        const y =
+          cellCenterY -
+          ((drawWidth / 2) * Math.sin(angleRad) +
+            (drawHeight / 2) * Math.cos(angleRad));
+
+        outputPage.drawPage(embeddedPage, {
+          x,
+          y,
+          width: drawWidth,
+          height: drawHeight,
+          rotate: degrees(rotation),
+        });
+      }
+    }
+
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([new Uint8Array(pdfBytes)], {
+      type: 'application/pdf',
+    });
+
+    downloadFile(blob, 'export-a3.pdf');
+    showModal('Success', t('multiTool.a3ExportSuccess'), 'success');
+  } catch (e) {
+    console.error('Failed to create A3 PDF:', e);
+    showModal('Error', t('multiTool.a3ExportError'), 'error');
   }
 }
 
