@@ -663,7 +663,7 @@ function createPageElement(
 
   const card = document.createElement('div');
   card.className =
-    'bg-gray-800 rounded-lg border-2 border-gray-700 p-2 relative group cursor-move';
+    'bg-gray-800 rounded-lg border-2 border-gray-700 p-2 relative group cursor-pointer';
   card.dataset.pageIndex = index.toString();
   card.dataset.pageId = pageData.id; // Set ID for reconciliation
 
