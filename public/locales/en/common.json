@@ -339,6 +339,7 @@
     "selection": "Selection:",
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
+    "invertSelection": "Invert Selection",
     "rotate": "Rotate:",
     "rotateLeft": "Left",
     "rotateRight": "Right",

@@ -300,6 +300,14 @@ function initializeTool() {
     deselectAll();
   });
 
+  document
+    .getElementById('invert-selection-btn')
+    ?.addEventListener('click', () => {
+      if (isRendering) return;
+      snapshot();
+      invertSelection();
+    });
+
   document.getElementById('export-pdf-btn')?.addEventListener('click', () => {
     if (isRendering) return;
     if (isRendering) return;
@@ -1053,6 +1061,17 @@ function selectAll() {
 
 function deselectAll() {
   selectedPages.clear();
+  lastSelectedIndex = null;
+  selectionBeforeShift = null;
+  updatePageDisplay();
+}
+
+function invertSelection() {
+  const inverted = new Set<number>();
+  allPages.forEach((_, index) => {
+    if (!selectedPages.has(index)) inverted.add(index);
+  });
+  selectedPages = inverted;
   lastSelectedIndex = null;
   selectionBeforeShift = null;
   updatePageDisplay();
