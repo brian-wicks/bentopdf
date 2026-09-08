@@ -45,6 +45,17 @@ export interface AnnotationPluginLite {
   };
 }
 
+export interface AnnotationToolDefaultsPatch {
+  color?: string;
+  overlayColor?: string;
+  strokeColor?: string;
+  opacity?: number;
+}
+
+export interface AnnotationCapabilityLite {
+  setToolDefaults: (toolId: string, patch: AnnotationToolDefaultsPatch) => void;
+}
+
 export interface FreeTextSystemFontAnnotation {
   id: string;
   pageIndex: number;

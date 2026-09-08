@@ -14,10 +14,17 @@ const embedPdfWasmUrl = new URL(
 
 import type { EmbedPdfContainer } from 'bentopdf-viewer';
 import type {
+  AnnotationCapabilityLite,
   AnnotationPluginLite,
   DocManagerPlugin,
   FreeTextSystemFontAnnotation,
 } from '@/types';
+
+const REDACT_TOOL_DEFAULTS = {
+  color: '#FFFFFF',
+  overlayColor: '#FFFFFF',
+  strokeColor: '#FFFFFF',
+};
 
 const FREETEXT_SUBTYPE = 3;
 
@@ -198,6 +205,15 @@ async function handleFiles(files: FileList) {
       docManagerPlugin = registry
         .getPlugin('document-manager')
         .provides() as unknown as DocManagerPlugin;
+
+      try {
+        const annotationCapability = registry
+          .getPlugin('annotation')
+          .provides() as unknown as AnnotationCapabilityLite;
+        annotationCapability.setToolDefaults('redact', REDACT_TOOL_DEFAULTS);
+      } catch {
+        // Annotation plugin unavailable (e.g. redaction disabled); keep viewer defaults.
+      }
 
       docManagerPlugin.onDocumentClosed((data: { id?: string }) => {
         const docId = data?.id || '';
