@@ -104,14 +104,14 @@ async function decryptPdf() {
     return;
   }
 
-  const password = (
-    document.getElementById('password-input') as HTMLInputElement
-  )?.value;
-
-  if (!password) {
-    showAlert('Input Required', 'Please enter the PDF password.');
-    return;
-  }
+  // An empty password is a valid, meaningful input here: PDFs that only
+  // restrict printing/copying/editing (an "owner password") are always
+  // encrypted with an empty user password under the hood, so leaving this
+  // blank is how those restrictions get removed without ever knowing the
+  // owner password. A real open/user password still can't be bypassed.
+  const password =
+    (document.getElementById('password-input') as HTMLInputElement)?.value ||
+    '';
 
   const loaderModal = document.getElementById('loader-modal');
   const loaderText = document.getElementById('loader-text');
@@ -178,7 +178,9 @@ async function decryptPdf() {
 
       if (successCount === 0) {
         throw new Error(
-          'No PDF files could be decrypted. The password may be incorrect.'
+          password
+            ? 'No PDF files could be decrypted. The password may be incorrect.'
+            : 'No PDF files could be decrypted without a password. These files require the actual open password.'
         );
       }
 
@@ -202,6 +204,11 @@ async function decryptPdf() {
       showAlert(
         'Incorrect Password',
         'The password you entered is incorrect. Please try again.'
+      );
+    } else if (!password && errorMessage.toLowerCase().includes('password')) {
+      showAlert(
+        'Open Password Required',
+        'This PDF is protected with a real open password (not just a permissions/owner password), so it cannot be unlocked automatically. Enter the actual password to decrypt it.'
       );
     } else if (errorMessage.includes('password')) {
       showAlert(

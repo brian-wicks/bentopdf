@@ -184,16 +184,20 @@
             <label
               for="password-input"
               class="block mb-2 text-sm font-medium text-gray-300"
-              >PDF Password</label
+              >PDF Password (optional)</label
             >
             <input
               type="password"
               id="password-input"
-              placeholder="Enter the PDF password"
+              placeholder="Leave blank to remove owner/permissions restrictions"
               class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5"
             />
             <p class="text-xs text-gray-500 mt-1">
-              Enter the password used to protect this PDF.
+              If you know the password, enter it. If not, leave this blank —
+              PDFs that only restrict printing/copying/editing (an "owner
+              password") can be unlocked without knowing that password, because
+              their content isn't actually encrypted with it. This cannot bypass
+              a real open password.
             </p>
           </div>
 
@@ -357,6 +361,23 @@
         Frequently Asked Questions
       </h2>
       <div class="space-y-4">
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            Can this remove a password I don't know?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            It depends on the type of protection. Many "protected" PDFs only
+            restrict printing, copying, or editing (an owner/permissions
+            password) while still opening freely — those restrictions can be
+            removed without ever knowing the password, simply by leaving the
+            password field blank. A genuine open password, required just to view
+            the file, cannot be bypassed this way; you'll need to enter the real
+            password.
+          </p>
+        </details>
         <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
           <summary
             class="cursor-pointer font-semibold text-white flex items-center justify-between"
