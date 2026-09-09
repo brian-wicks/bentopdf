@@ -26,7 +26,7 @@ import {
 } from '../utils/watermark-removal.js';
 
 const embedPdfWasmUrl = new URL(
-  'bentopdf-viewer/dist/pdfium.wasm',
+  'bentopdf-pdfium/editcore.wasm',
   import.meta.url
 ).href;
 

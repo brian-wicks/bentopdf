@@ -6,9 +6,9 @@
   </a>
 </p>
 
-**BentoPDF** is a powerful, privacy-first, client-side PDF toolkit that is self hostable and allows you to manipulate, edit, merge, and process PDF files directly in your browser. No server-side processing is required, ensuring your files remain secure and private.
+**BentoPDF** is a powerful, privacy-first, client-side PDF toolkit that is self-hostable and allows you to manipulate, edit, merge, and process PDF files directly in your browser. No server-side processing is required, ensuring your files remain secure and private.
 
-[![Docker Downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Falam00000%2Fbentopdf%2Fbentopdf&query=%24.downloadCount&logo=docker&label=Docker%20Downloads&color=blue)](https://github.com/alam00000/bentopdf/pkgs/container/bentopdf) [![Ko-fi](https://img.shields.io/badge/Buy%20me%20a%20Coffee-yellow?logo=kofi&style=flat-square)](https://ko-fi.com/alio01) ![GitHub Stars](https://img.shields.io/github/stars/alam00000/bentopdf?style=social)
+[![Docker Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Falam00000%2Fbentopdf%2Fbadges%2Fdocker-downloads.json&cacheSeconds=3600)](https://github.com/alam00000/bentopdf/pkgs/container/bentopdf-simple) [![Ko-fi](https://img.shields.io/badge/Buy%20me%20a%20Coffee-yellow?logo=kofi&style=flat-square)](https://ko-fi.com/alio01) ![GitHub Stars](https://img.shields.io/github/stars/alam00000/bentopdf?style=social)
 [![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff69b4)](https://github.com/sponsors/alam00000)
 
 ![BentoPDF Tools](public/images/bentopdf-tools.png)
@@ -29,6 +29,7 @@
   - [Convert to PDF](#convert-to-pdf)
   - [Convert from PDF](#convert-from-pdf)
   - [Secure & Optimize PDFs](#secure--optimize-pdfs)
+- [Other Products](#-other-products)
 - [Translations](#-translations)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
@@ -113,7 +114,7 @@ BentoPDF does **not** bundle AGPL-licensed processing libraries in its source co
 
 ## ⭐ Stargazers over time
 
-[![Star History Chart](https://api.star-history.com/svg?repos=alam00000/bentopdf&type=Date)](https://star-history.com/#alam00000/bentopdf&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=alam00000/bentopdf&type=Date)](https://github.com/alam00000/bentopdf/stargazers)
 
 ---
 
@@ -132,7 +133,7 @@ We're incredibly grateful to all our sponsors and supporters who help keep Bento
 ## ✨ Why BentoPDF?
 
 - **Privacy First**: All processing happens in your browser. Your files are never uploaded to a server, guaranteeing 100% privacy.
-- **No Limits**: Manipulate as many files as you want, as often you want. There are no restrictions or upload limits.
+- **No Limits**: Manipulate as many files as you want, as often as you want. There are no restrictions or upload limits.
 - **High Performance**: Built with modern web technologies, BentoPDF is fast and efficient, handling even large PDF files with ease.
 - **Completely Free**: BentoPDF is a free and open-source tool for everyone.
 
@@ -144,37 +145,38 @@ BentoPDF offers a comprehensive suite of tools to handle all your PDF needs.
 
 ### Organize & Manage PDFs
 
-| Tool Name                    | Description                                                                                             |
-| :--------------------------- | :------------------------------------------------------------------------------------------------------ |
-| **Merge PDFs**               | Combine multiple PDF files into one. Preserves Bookmarks.                                               |
-| **Split PDFs**               | Extract specific pages or divide a document into smaller files.                                         |
-| **Organize Pages**           | Reorder, duplicate, or delete pages with a simple drag-and-drop interface.                              |
-| **Extract Pages**            | Save a specific range of pages as a new PDF.                                                            |
-| **Delete Pages**             | Remove unwanted pages from your document.                                                               |
-| **Rotate PDF**               | Rotate individual or all pages in a document.                                                           |
-| **Rotate by Custom Degrees** | Rotate pages by any custom angle.                                                                       |
-| **N-Up PDF**                 | Combine multiple pages onto a single page.                                                              |
-| **View PDF**                 | A powerful, integrated PDF viewer.                                                                      |
-| **Alternate & Mix Pages**    | Merge pages by alternating pages from each PDF. Preserves Bookmarks.                                    |
-| **Posterize PDF**            | Split a PDF into multiple smaller pages for print.                                                      |
-| **PDF Multi Tool**           | Merge, Split, Organize, Delete, Rotate, Add Blank Pages, Extract and Duplicate in an unified interface. |
-| **PDF Booklet**              | Rearrange pages for double-sided booklet printing. Fold and staple to create a booklet.                 |
-| **Add Attachments**          | Embed one or more files into your PDF.                                                                  |
-| **Extract Attachments**      | Extract all embedded files from PDF(s) as a ZIP.                                                        |
-| **Edit Attachments**         | View or remove attachments in your PDF.                                                                 |
-| **Divide Pages**             | Divide pages horizontally or vertically.                                                                |
-| **Combine to Single Page**   | Stitch all pages into one continuous scroll.                                                            |
-| **Add Blank Page**           | Insert an empty page anywhere in your PDF.                                                              |
-| **Reverse Pages**            | Flip the order of all pages in your document.                                                           |
-| **View Metadata**            | Inspect the hidden properties of your PDF.                                                              |
-| **PDFs to ZIP**              | Package multiple PDF files into a ZIP archive.                                                          |
-| **Compare PDFs**             | Compare two PDFs side by side.                                                                          |
+| Tool Name                    | Description                                                                                            |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------- |
+| **Merge PDFs**               | Combine multiple PDF files into one. Preserves Bookmarks.                                              |
+| **Split PDFs**               | Extract specific pages or divide a document into smaller files.                                        |
+| **Organize Pages**           | Reorder, duplicate, or delete pages with a simple drag-and-drop interface.                             |
+| **Extract Pages**            | Save a specific range of pages as a new PDF.                                                           |
+| **Delete Pages**             | Remove unwanted pages from your document.                                                              |
+| **Rotate PDF**               | Rotate individual or all pages in a document.                                                          |
+| **Rotate by Custom Degrees** | Rotate pages by any custom angle.                                                                      |
+| **N-Up PDF**                 | Combine multiple pages onto a single page.                                                             |
+| **View PDF**                 | A powerful, integrated PDF viewer.                                                                     |
+| **Alternate & Mix Pages**    | Merge pages by alternating pages from each PDF. Preserves Bookmarks.                                   |
+| **Posterize PDF**            | Split a PDF into multiple smaller pages for print.                                                     |
+| **PDF Multi Tool**           | Merge, Split, Organize, Delete, Rotate, Add Blank Pages, Extract and Duplicate in a unified interface. |
+| **PDF Booklet**              | Rearrange pages for double-sided booklet printing. Fold and staple to create a booklet.                |
+| **Add Attachments**          | Embed one or more files into your PDF.                                                                 |
+| **Extract Attachments**      | Extract all embedded files from PDF(s) as a ZIP.                                                       |
+| **Edit Attachments**         | View or remove attachments in your PDF.                                                                |
+| **Divide Pages**             | Divide pages horizontally or vertically.                                                               |
+| **Combine to Single Page**   | Stitch all pages into one continuous scroll.                                                           |
+| **Add Blank Page**           | Insert an empty page anywhere in your PDF.                                                             |
+| **Reverse Pages**            | Flip the order of all pages in your document.                                                          |
+| **View Metadata**            | Inspect the hidden properties of your PDF.                                                             |
+| **PDFs to ZIP**              | Package multiple PDF files into a ZIP archive.                                                         |
+| **Compare PDFs**             | Compare two PDFs side by side.                                                                         |
 
 ### Edit & Modify PDFs
 
 | Tool Name                 | Description                                                                                                                                                                                     |
 | :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **PDF Editor**            | Annotate, highlight, redact, comment, add shapes/images, search, and view PDFs.                                                                                                                 |
+| **Edit PDF Text**         | Edit existing text directly in your PDF. Reuses the document's embedded fonts and keeps the rest of the page untouched.                                                                         |
 | **Create Fillable Forms** | Create professional fillable PDF forms with text fields, checkboxes, dropdowns, radio buttons, signatures, and more. Fully compliant with PDF standards for compatibility with all PDF viewers. |
 | **PDF Form Filler**       | Fill in forms directly in the browser. Also supports XFA forms.                                                                                                                                 |
 | **Add Page Numbers**      | Easily add page numbers with customizable formatting.                                                                                                                                           |
@@ -333,7 +335,7 @@ Open your browser at: http://localhost:3000
 > - **Self-Hosted build** — `ghcr.io/alam00000/bentopdf-simple:latest`. Every PDF tool the public site has, **without** the BentoPDF marketing (no hero, FAQ, testimonials, footer). Use this for internal/team/organization deployments. It is **not** a feature-reduced lite version.
 > - **Commercial build** — `ghcr.io/alam00000/bentopdf:latest`. The full marketing site, used by bentopdf.com itself and by commercial license holders running public-facing deployments. Includes hero, FAQ, testimonials, and footer.
 >
-> If in doubt: pull the Self Hosted build.
+> If in doubt: pull the Self-Hosted build.
 
 <details>
 <summary><b>Alternative: Using Docker Hub or Podman</b></summary>
@@ -685,7 +687,7 @@ BentoPDF can also be hosted from a subdirectory (e.g., `example.com/tools/bentop
 ```bash
 
 # Example:
-# 1. Build the app with the specific BASE_URL. BASE_URL must have a trailing and leading slash. The BASE_URL can be any url of your choice. Here we are using /tools/bentopdf/ as an example.
+# 1. Build the app with the specific BASE_URL. BASE_URL must have a trailing and leading slash. The BASE_URL can be any URL of your choice. Here we are using /tools/bentopdf/ as an example.
 
 BASE_URL=/tools/bentopdf/ npm run build
 
@@ -807,7 +809,7 @@ For detailed Quadlet configuration, see [Self-Hosting Docker Guide](https://bent
 
 ### 🏢 Self-Hosted build (Simple Mode)
 
-The Self-Hosted build (the `bentopdf-simple` image, also called Simple Mode) is **functionally identical** to the Commercial build. Every PDF tool is present and behaves the same. It just hides the marketing that only makes sense on bentopdf.com itself or on a commercial public-facing deployment. **It is not a feature reduced or "lite" version.**
+The Self-Hosted build (the `bentopdf-simple` image, also called Simple Mode) is **functionally identical** to the Commercial build. Every PDF tool is present and behaves the same. It just hides the marketing that only makes sense on bentopdf.com itself or on a commercial public-facing deployment. **It is not a feature-reduced or "lite" version.**
 
 **What the Self-Hosted build hides** (cosmetic only, no PDF features are removed):
 
@@ -819,7 +821,7 @@ The Self-Hosted build (the `bentopdf-simple` image, also called Simple Mode) is 
 - All PDF tools (merge, split, edit, sign, OCR, Office conversion, every other tool)
 - Custom branding support, all build-time and runtime config
 
-The Commercial build (`ghcr.io/alam00000/bentopdf:latest`) is what powers bentopdf.com itself and is used by commercial license holders running public facing deployments. It adds the hero, FAQ, testimonials, and footer that wouldn't make sense on an internal tool.
+The Commercial build (`ghcr.io/alam00000/bentopdf:latest`) is what powers bentopdf.com itself and is used by commercial license holders running public-facing deployments. It adds the hero, FAQ, testimonials, and footer that wouldn't make sense on an internal tool.
 
 If you're self-hosting BentoPDF for your team, organization, or as an internal tool, pull `ghcr.io/alam00000/bentopdf-simple:latest`. For more details, see [SIMPLE_MODE.md](SIMPLE_MODE.md).
 
@@ -1218,16 +1220,20 @@ BentoPDF was originally built using **HTML**, **CSS**, and **vanilla JavaScript*
 
 ---
 
+## 📦 Other Products
+
+| Product            | Description                                                                                                                           | Links                                                                                                  |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------- |
+| **Kura**           | PDF standards and preflight engine. Converts to every PDF/A level, PDF/UA, PDF/X, PDF/E and PDF/VT, and can perform preflight checks. | [Website](https://kura.bentopdf.com) · [GitHub](https://github.com/alam00000/bentopdf-kura)            |
+| **Hyper Compress** | The best open source PDF compression engine.                                                                                          | [Website](https://hyper.bentopdf.com) · [GitHub](https://github.com/alam00000/bentopdf-hyper-compress) |
+
+---
+
 ## 🗺️ Roadmap
 
 ### Planned Features:
 
 - **HTML to PDF**: Convert HTML files or web pages into PDF documents.
-- **Markdown to PDF**: Enhanced support for converting `.md` files to PDF.
-- **Convert to PDF/A**: Convert PDFs to the PDF/A archival format.
-- **Edit PDF Content**: Directly edit text and other content within your PDF.
-- **PDF to Office**: Converts PDF files into editable Word, Excel, and PowerPoint formats.
-- **Office to PDF**: Converts Word, Excel, and PowerPoint documents into optimized PDFs.
 
 Contributions and discussions on the roadmap are welcome! Join the conversation via [Discord](https://discord.gg/Bgq3Ay3f2w).
 

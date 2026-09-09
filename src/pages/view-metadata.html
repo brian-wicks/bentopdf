@@ -11,9 +11,9 @@
     />
     <meta
       name="description"
-      content="★ View Metadata online free - View metadata PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Inspect the hidden properties of your PDF. Free, no uploads, no signup. Runs entirely in your browser."
     />
-    <meta name="keywords" content="view metadata, view metadata, online pdf" />
+    <meta name="keywords" content="view metadata, online pdf" />
     <meta name="author" content="BentoPDF" />
     <meta
       name="robots"
@@ -32,7 +32,7 @@
     />
     <meta
       property="og:description"
-      content="★ View Metadata online free - View metadata PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Inspect the hidden properties of your PDF. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       property="og:image"
@@ -48,7 +48,7 @@
     <meta name="twitter:title" content="View Metadata Free" />
     <meta
       name="twitter:description"
-      content="★ View Metadata online free - View metadata PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser"
+      content="Inspect the hidden properties of your PDF. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       name="twitter:image"
@@ -62,10 +62,6 @@
     <meta name="apple-mobile-web-app-title" content="View Metadata" />
 
     <title>View PDF Metadata - BentoPDF</title>
-    <meta
-      name="description"
-      content="View all metadata from your PDF documents including title, author, subject, keywords, and custom fields. Free, secure, and runs entirely in your browser."
-    />
 
     <link href="/src/css/styles.css" rel="stylesheet" />
 
@@ -107,7 +103,7 @@
       >
         <button
           id="back-to-tools"
-          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+          class="flex items-center gap-2 text-indigo-300 hover:text-indigo-400 mb-6 font-semibold"
         >
           <i data-lucide="arrow-left" class="cursor-pointer"></i>
           <span class="cursor-pointer" data-i18n="tools.backToTools">
@@ -130,10 +126,7 @@
           class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
         >
           <div class="flex flex-col items-center justify-center pt-5 pb-6">
-            <i
-              data-lucide="upload-cloud"
-              class="w-10 h-10 mb-3 text-gray-400"
-            ></i>
+            <i class="ph ph-upload-simple text-4xl mb-3 text-gray-400"></i>
             <p class="mb-2 text-sm text-gray-400">
               <span class="font-semibold" data-i18n="upload.clickToSelect"
                 >Click to select a file</span
@@ -281,36 +274,36 @@
           href="merge-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Merge Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online merge pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Merge PDF</h3>
+          <p class="text-gray-400 text-sm">Free online merge PDF tool</p>
         </a>
         <a
           href="compress-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Compress Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online compress pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Compress PDF</h3>
+          <p class="text-gray-400 text-sm">Free online compress PDF tool</p>
         </a>
         <a
           href="split-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Split Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online split pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Split PDF</h3>
+          <p class="text-gray-400 text-sm">Free online split PDF tool</p>
         </a>
         <a
           href="edit-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Edit Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online edit pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Edit PDF</h3>
+          <p class="text-gray-400 text-sm">Free online edit PDF tool</p>
         </a>
         <a
           href="rotate-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Rotate Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online rotate pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Rotate PDF</h3>
+          <p class="text-gray-400 text-sm">Free online rotate PDF tool</p>
         </a>
       </div>
     </section>
@@ -323,41 +316,112 @@
       >
         Frequently Asked Questions
       </h2>
-      <div class="space-y-4">
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is view metadata really free?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+      <div class="faq-list">
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            What information can a PDF reveal about me?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Yes! BentoPDF is 100% free with no hidden fees, no signup required,
-            and unlimited file processing.
+          <p class="faq-d-a">
+            The Info dictionary often holds the author's name (usually the
+            operating system or Office username), the software used, and
+            creation and modification timestamps. XMP metadata can add document
+            IDs, revision history, and application details, and filled form
+            field values are shown too. If you're about to publish or share the
+            file, run
+            <a
+              href="/remove-metadata"
+              class="text-indigo-300 hover:text-indigo-400"
+              >Remove Metadata</a
+            >
+            afterward.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Are my files private and secure?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            What is the difference between the Info dictionary and XMP metadata?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Absolutely! All processing happens in your browser. Your files never
-            leave your device, ensuring complete privacy.
+          <p class="faq-d-a">
+            The Info dictionary is the older set of fixed fields: Title, Author,
+            Subject, Keywords, Creator, Producer, and dates. XMP is an XML block
+            with namespaces such as Dublin Core, xmp, and pdf, and it can hold
+            far more. The two are meant to agree but often don't, which is why
+            the tool shows both.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is there a file size limit?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Why are the dates shown differently from what Acrobat displays?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            No! Process files of any size, as many times as you want, completely
-            free.
+          <p class="faq-d-a">
+            PDF dates are stored as strings like D:20240101120000Z. The tool
+            converts them to a readable date in your local time zone, so the
+            hour can differ from a viewer that shows the raw value or uses a
+            different zone.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            How can I tell which program created the PDF?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Look at the Creator field (the application that made the original
+            document, such as Word or InDesign) and the Producer field (the
+            library that wrote the PDF, such as Acrobat Distiller or a PDF
+            engine). The XMP section usually repeats them as xmp:CreatorTool and
+            pdf:Producer.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Does it show the values filled into form fields?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            The Interactive Form Fields section lists each field name with its
+            current value, or Not Set when empty, which is a quick way to check
+            what data a filled form contains before sending it.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Can I copy or export the metadata?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            The Copy Metadata as JSON button puts the Info dictionary fields on
+            your clipboard as a JSON object. The XMP tree and form field values
+            are displayed on the page but aren't included in the copied JSON.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Can I change what I see here?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            This tool is read-only. Use
+            <a
+              href="/edit-metadata"
+              class="text-indigo-300 hover:text-indigo-400"
+              >Edit Metadata</a
+            >
+            to change the title, author, keywords, and dates, or Remove Metadata
+            to strip everything before publishing.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Is the PDF uploaded to read its metadata?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            No. The file is parsed by pdf.js in your browser as soon as you
+            select it, and nothing is transmitted, so you can inspect a
+            sensitive document before deciding where it goes.
           </p>
         </details>
       </div>

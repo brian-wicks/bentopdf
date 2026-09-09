@@ -216,7 +216,7 @@
     },
     "analytics": {
       "question": "Bruger I cookies eller analyseværktøjer?",
-      "answer": "Vi bruger kun Simple Analytics til anonyme besøgsdata. Ingen personlige oplysninger indsamles."
+      "answer": "Nej. BentoPDF sporer dig slet ikke. Vi bruger hverken cookies, analyseværktøjer eller sporingsscripts – heller ikke på den live hjemmeside bentopdf.com. Vi ved aldrig, hvem du er, eller hvad du bruger værktøjerne til."
     }
   },
   "testimonials": {
@@ -239,7 +239,9 @@
     "legal": "Juridisk",
     "termsAndConditions": "Terms and Conditions",
     "privacyPolicy": "Privacy Policy",
-    "followUs": "Følg os"
+    "followUs": "Følg os",
+    "privacyShort": "Privatliv",
+    "termsShort": "Vilkår"
   },
   "merge": {
     "title": "Flet PDF'er",

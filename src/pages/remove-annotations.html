@@ -11,12 +11,9 @@
     />
     <meta
       name="description"
-      content="★ Remove Annotations online free - Remove annotations PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Strip comments, highlights, and links. Free, no uploads, no signup. Runs entirely in your browser."
     />
-    <meta
-      name="keywords"
-      content="remove annotations, remove annotations, online pdf"
-    />
+    <meta name="keywords" content="remove annotations, online pdf" />
     <meta name="author" content="BentoPDF" />
     <meta
       name="robots"
@@ -38,7 +35,7 @@
     />
     <meta
       property="og:description"
-      content="★ Remove Annotations online free - Remove annotations PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Strip comments, highlights, and links. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       property="og:image"
@@ -57,7 +54,7 @@
     <meta name="twitter:title" content="Remove Annotations Free" />
     <meta
       name="twitter:description"
-      content="★ Remove Annotations online free - Remove annotations PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works "
+      content="Strip comments, highlights, and links. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       name="twitter:image"
@@ -71,10 +68,6 @@
     <meta name="apple-mobile-web-app-title" content="Remove Annotations" />
 
     <title>Remove Annotations - BentoPDF</title>
-    <meta
-      name="description"
-      content="Remove all annotations, comments, and markup from your PDF documents. Free, secure, and runs entirely in your browser."
-    />
 
     <link href="/src/css/styles.css" rel="stylesheet" />
 
@@ -116,7 +109,7 @@
       >
         <button
           id="back-to-tools"
-          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+          class="flex items-center gap-2 text-indigo-300 hover:text-indigo-400 mb-6 font-semibold"
         >
           <i data-lucide="arrow-left" class="cursor-pointer"></i>
           <span class="cursor-pointer" data-i18n="tools.backToTools">
@@ -142,10 +135,7 @@
           class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
         >
           <div class="flex flex-col items-center justify-center pt-5 pb-6">
-            <i
-              data-lucide="upload-cloud"
-              class="w-10 h-10 mb-3 text-gray-400"
-            ></i>
+            <i class="ph ph-upload-simple text-4xl mb-3 text-gray-400"></i>
             <p class="mb-2 text-sm text-gray-400">
               <span class="font-semibold" data-i18n="upload.clickToSelect"
                 >Click to select a file</span
@@ -288,36 +278,36 @@
           href="merge-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Merge Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online merge pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Merge PDF</h3>
+          <p class="text-gray-400 text-sm">Free online merge PDF tool</p>
         </a>
         <a
           href="compress-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Compress Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online compress pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Compress PDF</h3>
+          <p class="text-gray-400 text-sm">Free online compress PDF tool</p>
         </a>
         <a
           href="split-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Split Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online split pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Split PDF</h3>
+          <p class="text-gray-400 text-sm">Free online split PDF tool</p>
         </a>
         <a
           href="edit-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Edit Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online edit pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Edit PDF</h3>
+          <p class="text-gray-400 text-sm">Free online edit PDF tool</p>
         </a>
         <a
           href="rotate-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Rotate Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online rotate pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Rotate PDF</h3>
+          <p class="text-gray-400 text-sm">Free online rotate PDF tool</p>
         </a>
       </div>
     </section>
@@ -330,41 +320,103 @@
       >
         Frequently Asked Questions
       </h2>
-      <div class="space-y-4">
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is remove annotations really free?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+      <div class="faq-list">
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            What counts as an annotation here?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Yes! BentoPDF is 100% free with no hidden fees, no signup required,
-            and unlimited file processing.
+          <p class="faq-d-a">
+            Everything stored in a page's annotation list: sticky notes and
+            comments, highlights, underlines, strikethroughs, freehand ink,
+            stamps, shapes, text boxes, clickable links, and file attachments.
+            Page text, images, and vector graphics are never touched.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Are my files private and secure?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Will my form fields survive?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Absolutely! All processing happens in your browser. Your files never
-            leave your device, ensuring complete privacy.
+          <p class="faq-d-a">
+            No. Form fields are stored as widget annotations, so they're removed
+            along with everything else and any typed-in values disappear with
+            them. If you want the filled-in values to stay visible, run
+            <a href="/flatten-pdf" class="text-indigo-300 hover:text-indigo-400"
+              >Flatten PDF</a
+            >
+            first, then remove annotations.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is there a file size limit?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Does it remove watermarks?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            No! Process files of any size, as many times as you want, completely
-            free.
+          <p class="faq-d-a">
+            Only watermarks that were added as annotations. Watermarks drawn
+            into the page content itself stay in place, since they're part of
+            the page graphics rather than a separate object.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Can I remove only some annotations instead of all of them?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Not with this tool; it clears every annotation on every page in one
+            pass. To delete individual comments or highlights, open the file in
+            the
+            <a href="/edit-pdf" class="text-indigo-300 hover:text-indigo-400"
+              >PDF Editor</a
+            >
+            and remove them one at a time.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Why are some highlights still there after processing?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            They were flattened: a previous tool merged them into the page
+            graphics, so they're no longer separate annotation objects.
+            Flattened markup can't be removed by this tool.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Does the text stay selectable, and do bookmarks survive?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Yes to both. The file is edited at the object level without
+            re-rendering pages, so text remains selectable and searchable, and
+            bookmarks, page order, and page sizes are unchanged. Links lose
+            their click action, though the visible link text stays.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Will a digital signature stay valid?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            No. Signature fields are annotations and are removed, and saving a
+            modified copy invalidates an existing signature anyway. Remove
+            annotations before signing, not after.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Is the PDF uploaded to strip the comments?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            No. The annotations are removed with pdf-lib in your browser and the
+            cleaned copy downloads under the original filename, so a heavily
+            annotated contract never leaves your machine.
           </p>
         </details>
       </div>

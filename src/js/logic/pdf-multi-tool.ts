@@ -26,13 +26,9 @@ import {
 import { moveSelectedPages } from '../utils/move-selected-pages.js';
 import { isSelectionDragSnapPoint } from '../utils/selection-drag-snap.js';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
-
 import { t } from '../i18n/i18n';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import '../utils/setup-pdf-worker.js';
 
 interface PageData {
   id: string; // Unique ID for DOM reconciliation

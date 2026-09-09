@@ -11,9 +11,9 @@
     />
     <meta
       name="description"
-      content="★ Bookmark online free - Bookmark PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Bookmark online. Free, no uploads, no signup. Runs entirely in your browser."
     />
-    <meta name="keywords" content="bookmark, bookmark, online pdf" />
+    <meta name="keywords" content="bookmark, online pdf" />
     <meta name="author" content="BentoPDF" />
     <meta
       name="robots"
@@ -32,7 +32,7 @@
     />
     <meta
       property="og:description"
-      content="★ Bookmark online free - Bookmark PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & secure"
+      content="Bookmark online. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       property="og:image"
@@ -48,7 +48,7 @@
     <meta name="twitter:title" content="Bookmark Free" />
     <meta
       name="twitter:description"
-      content="★ Bookmark online free - Bookmark PDFs easily ★ No signup ★ Unlimited files ★ Privacy-first ★ Works in browser ★ Fast & "
+      content="Bookmark online. Free, no uploads, no signup. Runs entirely in your browser."
     />
     <meta
       name="twitter:image"
@@ -103,7 +103,7 @@
       >
         <button
           id="back-to-tools"
-          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+          class="flex items-center gap-2 text-indigo-300 hover:text-indigo-400 mb-6 font-semibold"
         >
           <i data-lucide="arrow-left" class="cursor-pointer"></i>
           <span class="cursor-pointer" data-i18n="tools.backToTools">
@@ -126,10 +126,7 @@
           class="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-700 hover:bg-gray-600 transition-colors duration-300"
         >
           <div class="flex flex-col items-center justify-center pt-5 pb-6">
-            <i
-              data-lucide="upload-cloud"
-              class="w-10 h-10 mb-3 text-gray-400"
-            ></i>
+            <i class="ph ph-upload-simple text-4xl mb-3 text-gray-400"></i>
             <p class="mb-2 text-sm text-gray-300">
               <span class="font-semibold" data-i18n="upload.clickToSelect"
                 >Click to select a file</span
@@ -250,9 +247,9 @@
       >
         <div class="max-w-7xl mx-auto px-4 py-3">
           <div class="flex items-center justify-between flex-wrap gap-2">
-            <h1 class="text-xl font-bold text-white" id="filename-display">
+            <div class="text-xl font-bold text-white" id="filename-display">
               PDF Bookmark Editor
-            </h1>
+            </div>
             <div class="flex gap-2 flex-wrap">
               <button
                 id="undo-btn"
@@ -745,36 +742,36 @@
           href="merge-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Merge Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online merge pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Merge PDF</h3>
+          <p class="text-gray-400 text-sm">Free online merge PDF tool</p>
         </a>
         <a
           href="compress-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Compress Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online compress pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Compress PDF</h3>
+          <p class="text-gray-400 text-sm">Free online compress PDF tool</p>
         </a>
         <a
           href="split-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Split Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online split pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Split PDF</h3>
+          <p class="text-gray-400 text-sm">Free online split PDF tool</p>
         </a>
         <a
           href="edit-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Edit Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online edit pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Edit PDF</h3>
+          <p class="text-gray-400 text-sm">Free online edit PDF tool</p>
         </a>
         <a
           href="rotate-pdf.html"
           class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
         >
-          <h3 class="text-white font-semibold mb-1">Rotate Pdf</h3>
-          <p class="text-gray-400 text-sm">Free online rotate pdf tool</p>
+          <h3 class="text-white font-semibold mb-1">Rotate PDF</h3>
+          <p class="text-gray-400 text-sm">Free online rotate PDF tool</p>
         </a>
       </div>
     </section>
@@ -787,41 +784,106 @@
       >
         Frequently Asked Questions
       </h2>
-      <div class="space-y-4">
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is bookmark really free?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+      <div class="faq-list">
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            How do I add bookmarks to a PDF that doesn't have any?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Yes! BentoPDF is 100% free with no hidden fees, no signup required,
-            and unlimited file processing.
+          <p class="faq-d-a">
+            Upload the PDF, go to a page, type a title, and click Add to Page;
+            drag entries to nest or reorder them. Click Save PDF with Bookmarks
+            to download the result. For a printed contents page inside the
+            document rather than sidebar navigation, use
+            <a
+              href="/table-of-contents"
+              class="text-indigo-300 hover:text-indigo-400"
+              >Table of Contents</a
+            >
+            instead.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Are my files private and secure?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Will my existing bookmarks be kept?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            Absolutely! All processing happens in your browser. Your files never
-            leave your device, ensuring complete privacy.
+          <p class="faq-d-a">
+            Only if you check Auto-extract existing bookmarks before uploading,
+            or use the extract button afterward, so they load into the panel.
+            When you save, the panel's contents replace the PDF's bookmark tree
+            entirely, so anything not loaded into the editor is dropped.
           </p>
         </details>
-        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
-          <summary
-            class="cursor-pointer font-semibold text-white flex items-center justify-between"
-          >
-            Is there a file size limit?
-            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            What is the CSV format for importing bookmarks?
+            <i data-lucide="plus" class="faq-d-icon"></i>
           </summary>
-          <p class="mt-3 text-gray-400">
-            No! Process files of any size, as many times as you want, completely
-            free.
+          <p class="faq-d-a">
+            A header row followed by one line per bookmark with three columns:
+            title,page,level. Titles containing commas go in double quotes, page
+            is the 1-based page number, and level controls nesting, with the
+            lowest number for top-level entries and each deeper child adding
+            one.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Can a bookmark jump to a specific spot on a page instead of the top?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Open the bookmark's edit dialog, turn on Set custom destination, and
+            either type X and Y coordinates plus a zoom percentage or click the
+            pick button and then click the exact spot on the page preview. The
+            bookmark is saved as an XYZ destination, which most readers honor.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Can I color or bold bookmarks?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Each bookmark can be red, blue, green, yellow, purple, or a custom
+            hex color, and styled bold, italic, or bold italic. Turn on Batch
+            Mode to select several bookmarks and apply a color or style to all
+            of them at once.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            How do I get bookmarks out of a PDF for editing in a spreadsheet?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            Load them with Auto-extract, then use Export to CSV or Export to
+            JSON; the file is named after your PDF with a -bookmarks suffix. The
+            CSV opens in Excel or Google Sheets, and once you've edited it you
+            can import it back and save a new PDF.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Does the editor work on password-protected PDFs?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            You'll be asked for the password when you upload the file, and the
+            editor opens once it's entered. The saved PDF is written without the
+            password, so protect it again afterward if you need to.
+          </p>
+        </details>
+        <details class="faq-d">
+          <summary class="faq-d-q">
+            Is my PDF uploaded while I edit bookmarks?
+            <i data-lucide="plus" class="faq-d-icon"></i>
+          </summary>
+          <p class="faq-d-a">
+            No. The page preview, the bookmark tree, and the final save are all
+            handled in your browser with PDF.js and pdf-lib, so the file never
+            leaves your computer.
           </p>
         </details>
       </div>
