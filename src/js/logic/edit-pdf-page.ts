@@ -6,6 +6,11 @@ import { makeUniqueFileKey } from '../utils/deduplicate-filename.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { getEditorDisabledCategories } from '../utils/disabled-tools.js';
 import { editorFontFallback } from '../config/editor-fonts.js';
+import {
+  redactAllOccurrences,
+  openRedactionPanel,
+  type PluginRegistryLite,
+} from '../utils/redact-search.js';
 
 const embedPdfWasmUrl = new URL(
   'bentopdf-viewer/dist/pdfium.wasm',
@@ -64,6 +69,7 @@ function collectSystemFontFreeTexts(
 
 let viewerInstance: EmbedPdfContainer | null = null;
 let docManagerPlugin: DocManagerPlugin | null = null;
+let viewerRegistry: PluginRegistryLite | null = null;
 let isViewerInitialized = false;
 let currentFileName = 'document.pdf';
 const fileEntryMap = new Map<string, HTMLElement>();
@@ -81,8 +87,81 @@ function resetViewer() {
   if (fileInput) fileInput.value = '';
   viewerInstance = null;
   docManagerPlugin = null;
+  viewerRegistry = null;
   isViewerInitialized = false;
   fileEntryMap.clear();
+}
+
+async function findAndRedactAll() {
+  const input = document.getElementById(
+    'redact-search-input'
+  ) as HTMLInputElement | null;
+  const query = input?.value.trim() ?? '';
+  if (!query) {
+    showAlert('Search Text Required', 'Enter the text you want to redact.');
+    return;
+  }
+  if (!viewerRegistry || !docManagerPlugin) {
+    showAlert('Error', 'The editor is not ready yet.');
+    return;
+  }
+  const documentId = docManagerPlugin.getActiveDocumentId();
+  if (!documentId) {
+    showAlert('Error', 'No document is open.');
+    return;
+  }
+
+  showLoader(`Searching for "${query}"...`);
+  try {
+    const count = await redactAllOccurrences(viewerRegistry, documentId, query);
+    if (count === 0) {
+      showAlert('No Matches', `"${query}" was not found in this document.`);
+      return;
+    }
+    openRedactionPanel(viewerRegistry, documentId);
+  } catch (err) {
+    console.error('Find and redact failed:', err);
+    showAlert('Error', 'Failed to search and mark redactions.');
+  } finally {
+    hideLoader();
+  }
+}
+
+function ensureRedactSearchBar(pdfWrapper: HTMLElement) {
+  if (document.getElementById('redact-search-bar')) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'redact-search-bar';
+  bar.className =
+    'flex flex-col sm:flex-row gap-2 mb-3 bg-gray-800 border border-gray-700 rounded-lg p-2';
+  bar.innerHTML = `
+    <div class="relative flex-1">
+      <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      <input id="redact-search-input" type="text" placeholder="Find text and redact every occurrence..."
+        class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg pl-9 pr-3 py-2 text-sm" />
+    </div>
+    <button id="redact-search-btn"
+      class="btn bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2 flex-shrink-0">
+      <i data-lucide="eraser" class="w-4 h-4"></i>
+      Redact All Matches
+    </button>`;
+  pdfWrapper.prepend(bar);
+
+  document
+    .getElementById('redact-search-btn')
+    ?.addEventListener('click', () => {
+      void findAndRedactAll();
+    });
+  document
+    .getElementById('redact-search-input')
+    ?.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') {
+        e.preventDefault();
+        void findAndRedactAll();
+      }
+    });
+
+  createIcons({ icons });
 }
 
 function removeFileEntry(documentId: string) {
@@ -202,9 +281,11 @@ async function handleFiles(files: FileList) {
       });
 
       const registry = await viewerInstance.registry;
+      viewerRegistry = registry as unknown as PluginRegistryLite;
       docManagerPlugin = registry
         .getPlugin('document-manager')
         .provides() as unknown as DocManagerPlugin;
+      ensureRedactSearchBar(pdfWrapper);
 
       try {
         const annotationCapability = registry

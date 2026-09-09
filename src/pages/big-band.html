@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Big Band - Decrypt, Edit & Organize PDFs | BentoPDF</title>
+    <meta
+      name="title"
+      content="Big Band - Decrypt, Edit & Organize PDFs | BentoPDF"
+    />
+    <meta
+      name="description"
+      content="Upload any number of PDFs, remove their password protection, edit and redact them, then organize the result — all in one guided workflow, entirely in your browser."
+    />
+    <meta
+      name="keywords"
+      content="pdf workflow, decrypt pdf, redact pdf, organize pdf, multi tool"
+    />
+    <meta name="author" content="BentoPDF" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="canonical" href="https://www.bentopdf.com/big-band" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.bentopdf.com/big-band" />
+    <meta
+      property="og:title"
+      content="Big Band - Decrypt, Edit & Organize PDFs | BentoPDF"
+    />
+    <meta
+      property="og:description"
+      content="Upload any number of PDFs, remove their password protection, edit and redact them, then organize the result — all in one guided workflow."
+    />
+    <meta property="og:site_name" content="BentoPDF" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Big Band" />
+    <meta
+      name="twitter:description"
+      content="Decrypt, edit/redact, and organize any number of PDFs in one guided workflow."
+    />
+    <meta name="twitter:site" content="@BentoPDF" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Big Band" />
+
+    <link href="/src/css/styles.css" rel="stylesheet" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+
+  <body
+    class="antialiased bg-gray-900 h-[100dvh] flex flex-col overflow-hidden"
+  >
+    {{> navbar }}
+
+    <div class="flex flex-col flex-1 min-h-0">
+      <!-- Header: title + step indicator + global actions -->
+      <div
+        class="flex-none bg-gray-800 border-b border-gray-700 px-4 py-3 flex flex-col gap-3"
+      >
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold text-white">Big Band</h1>
+            <p class="text-xs sm:text-sm text-gray-400">
+              Decrypt, edit/redact, then organize any number of PDFs — one
+              guided flow, no re-uploading between steps.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              id="bb-download-current"
+              class="hidden btn bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-2"
+            >
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download Current PDF</span>
+            </button>
+            <button
+              id="bb-start-over"
+              class="hidden btn bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-2"
+            >
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              <span>Start Over</span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="bb-steps"
+          class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-wrap"
+        >
+          <div class="bb-step flex items-center gap-1.5" data-step="1">
+            <span class="bb-step-dot">1</span>
+            <span>Upload</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600"></i>
+          <div class="bb-step flex items-center gap-1.5" data-step="2">
+            <span class="bb-step-dot">2</span>
+            <span>Decrypt &amp; Merge</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600"></i>
+          <div class="bb-step flex items-center gap-1.5" data-step="3">
+            <span class="bb-step-dot">3</span>
+            <span>Edit &amp; Redact</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600"></i>
+          <div class="bb-step flex items-center gap-1.5" data-step="4">
+            <span class="bb-step-dot">4</span>
+            <span>Multi Tool</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <div class="flex-1 min-h-0 overflow-y-auto">
+        <!-- Step 1: Upload -->
+        <div id="bb-panel-upload" class="bb-panel p-4 sm:p-8">
+          <div class="max-w-2xl mx-auto">
+            <div
+              id="bb-drop-zone"
+              class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-800 hover:bg-gray-700 transition-colors duration-300"
+            >
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <i
+                  data-lucide="upload-cloud"
+                  class="w-10 h-10 mb-3 text-gray-400"
+                ></i>
+                <p class="mb-2 text-sm text-gray-400">
+                  <span class="font-semibold">Click to select PDFs</span>
+                  or drag and drop
+                </p>
+                <p class="text-xs text-gray-500">
+                  Any number of PDF files supported
+                </p>
+                <p class="text-xs text-gray-500">
+                  Your files never leave your device.
+                </p>
+              </div>
+              <input
+                id="bb-file-input"
+                type="file"
+                class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                accept="application/pdf"
+                multiple
+              />
+            </div>
+
+            <div id="bb-file-display-area" class="mt-4 space-y-2"></div>
+
+            <button id="bb-start-btn" class="hidden btn-gradient w-full mt-6">
+              Start Big Band
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Decrypt & Merge -->
+        <div id="bb-panel-process" class="bb-panel hidden p-4 sm:p-8">
+          <div
+            class="max-w-2xl mx-auto bg-gray-800 border border-gray-700 rounded-xl p-6"
+          >
+            <div class="flex items-center gap-3 mb-4">
+              <div class="solid-spinner" id="bb-process-spinner"></div>
+              <p id="bb-process-status" class="text-gray-200 font-medium">
+                Preparing...
+              </p>
+            </div>
+            <div
+              id="bb-process-actions"
+              class="hidden flex flex-col sm:flex-row gap-3 mt-6"
+            >
+              <button
+                id="bb-download-merged"
+                class="btn bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 flex-1"
+              >
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download Merged PDF
+              </button>
+              <button id="bb-continue-to-edit" class="btn-gradient flex-1">
+                Continue to Edit &amp; Redact
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Edit & Redact -->
+        <div
+          id="bb-panel-edit"
+          class="bb-panel hidden h-full flex flex-col p-2 sm:p-4"
+        >
+          <div
+            class="flex-none flex flex-col sm:flex-row gap-2 mb-3 bg-gray-800 border border-gray-700 rounded-lg p-2"
+          >
+            <div class="relative flex-1">
+              <i
+                data-lucide="search"
+                class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+              ></i>
+              <input
+                id="bb-redact-search-input"
+                type="text"
+                placeholder="Find text and redact every occurrence..."
+                class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg pl-9 pr-3 py-2 text-sm"
+              />
+            </div>
+            <button
+              id="bb-redact-search-btn"
+              class="btn bg-gray-700 hover:bg-gray-600 text-white text-sm font-semibold px-4 py-2 rounded-lg flex items-center justify-center gap-2 flex-shrink-0"
+            >
+              <i data-lucide="eraser" class="w-4 h-4"></i>
+              Redact All Matches
+            </button>
+          </div>
+          <div id="bb-embed-pdf-wrapper" class="flex-1 min-h-0 flex flex-col">
+            <div
+              id="bb-embed-pdf-container"
+              class="flex-1 min-h-0 rounded-lg overflow-hidden bg-gray-800"
+            ></div>
+          </div>
+          <div class="flex-none flex flex-col sm:flex-row gap-3 mt-3">
+            <button
+              id="bb-download-edited"
+              class="btn bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 flex-1"
+            >
+              <i data-lucide="download" class="w-4 h-4"></i>
+              Download Current PDF
+            </button>
+            <button id="bb-continue-to-multitool" class="btn-gradient flex-1">
+              Continue to Multi Tool
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Multi Tool -->
+        <div
+          id="bb-panel-multitool"
+          class="bb-panel hidden h-full flex flex-col p-2 sm:p-4"
+        >
+          <p class="flex-none text-xs text-gray-400 mb-2">
+            Finish organizing your pages below, then use its own Download button
+            to save your PDF.
+          </p>
+          <iframe
+            id="bb-multitool-frame"
+            title="PDF Multi Tool"
+            class="flex-1 min-h-0 w-full border-0 rounded-lg bg-gray-900"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader Modal -->
+    <div
+      id="loader-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+      >
+        <div class="solid-spinner"></div>
+        <p id="loader-text" class="text-white text-lg font-medium">
+          Processing...
+        </p>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-700"
+      >
+        <h3 id="alert-title" class="text-xl font-bold text-white mb-2">
+          Alert
+        </h3>
+        <p id="alert-message" class="text-gray-300 mb-6"></p>
+        <button
+          id="alert-ok"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <style>
+      .bb-step-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 9999px;
+        background-color: #374151;
+        color: #9ca3af;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      .bb-step {
+        color: #6b7280;
+      }
+      .bb-step.bb-step-done .bb-step-dot {
+        background-color: #4338ca;
+        color: #fff;
+      }
+      .bb-step.bb-step-done {
+        color: #d1d5db;
+      }
+      .bb-step.bb-step-active .bb-step-dot {
+        background-color: #6366f1;
+        color: #fff;
+      }
+      .bb-step.bb-step-active {
+        color: #fff;
+      }
+    </style>
+
+    <script type="module" src="/src/js/logic/big-band-page.ts"></script>
+    <script type="module" src="/src/js/mobileMenu.ts"></script>
+    <script type="module" src="/src/js/main.ts"></script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Big Band - BentoPDF",
+        "applicationCategory": "PDF Tool",
+        "operatingSystem": "Any - Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+  </body>
+</html>

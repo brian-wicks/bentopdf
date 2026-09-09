@@ -187,6 +187,31 @@ function hideLoading() {
   if (loader) loader.classList.add('hidden');
 }
 
+// When loaded inside the Big Band workflow's iframe (?embedded=big-band),
+// accept the already-decrypted/edited working PDF via postMessage instead
+// of requiring the user to pick a file, and let the parent handle "Close"
+// so it doesn't navigate the embedded iframe away from the tool.
+const isBigBandEmbed =
+  new URLSearchParams(window.location.search).get('embedded') === 'big-band';
+
+if (isBigBandEmbed) {
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.origin !== window.location.origin) return;
+    if (event.source !== window.parent) return;
+    const data = event.data as {
+      type?: string;
+      files?: { name: string; buffer: ArrayBuffer }[];
+    } | null;
+    if (!data || data.type !== 'big-band:load-files') return;
+    if (!Array.isArray(data.files) || data.files.length === 0) return;
+
+    const files = data.files.map(
+      (f) => new File([f.buffer], f.name, { type: 'application/pdf' })
+    );
+    void handleIncomingFiles(files);
+  });
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     console.log('PDF Multi Tool: DOMContentLoaded');
@@ -206,8 +231,22 @@ function initializeTool() {
   initializeGlobalShortcuts();
 
   document.getElementById('close-tool-btn')?.addEventListener('click', () => {
+    if (isBigBandEmbed && window.parent !== window) {
+      window.parent.postMessage(
+        { type: 'big-band:close-multitool' },
+        window.location.origin
+      );
+      return;
+    }
     window.location.href = import.meta.env.BASE_URL;
   });
+
+  if (isBigBandEmbed && window.parent !== window) {
+    window.parent.postMessage(
+      { type: 'big-band:multitool-ready' },
+      window.location.origin
+    );
+  }
 
   document.getElementById('upload-pdfs-btn')?.addEventListener('click', () => {
     console.log('Upload button clicked, isRendering:', isRendering);

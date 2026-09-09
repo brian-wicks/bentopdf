@@ -12,6 +12,13 @@ export interface DocManagerPlugin {
   }) => void;
   closeDocument: (id: string) => void;
   saveAsCopy: (id: string) => Promise<Uint8Array>;
+  getActiveDocumentId: () => string | null;
+  onActiveDocumentChanged: (
+    callback: (data: {
+      previousDocumentId?: string;
+      currentDocumentId?: string;
+    }) => void
+  ) => void;
 }
 
 export interface EditorAnnotationRect {
