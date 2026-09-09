@@ -6,7 +6,7 @@ const baseCategories = [
       {
         href: import.meta.env.BASE_URL + 'big-band.html',
         name: 'Big Band',
-        icon: 'ph-stack-plus',
+        icon: 'ph-lectern',
         subtitle:
           'Decrypt, edit/redact, then organize any number of PDFs in one guided workflow.',
       },
