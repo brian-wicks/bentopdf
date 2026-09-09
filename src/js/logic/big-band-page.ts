@@ -326,6 +326,54 @@ async function startProcessing() {
   goToStep(3);
 }
 
+const DOC_EVENT_TIMEOUT_MS = 15000;
+
+// Some rejection paths inside the viewer's document manager (e.g. hitting
+// its document-count limit) settle an internal task without ever emitting
+// onDocumentOpened/onDocumentError, which would otherwise hang these waits
+// forever. A timeout turns that into a clear error instead of a stuck UI.
+function withTimeout<T>(promise: Promise<T>, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(message)),
+      DOC_EVENT_TIMEOUT_MS
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
+// openDocumentBuffer only *starts* the load — it returns before the
+// document is actually parsed, so treating the document as ready right
+// after calling it can leave the viewer showing nothing if the load is
+// still in flight (or fails) when the caller moves on. Wait for the
+// plugin's own "loaded" signal, or surface its "error" signal, instead of
+// assuming success.
+function openDocumentAndWait(
+  plugin: DocManagerPlugin,
+  buffer: ArrayBuffer,
+  name: string
+): Promise<void> {
+  return withTimeout(
+    new Promise<void>((resolve, reject) => {
+      plugin.onDocumentOpened(() => resolve());
+      plugin.onDocumentError((data) => {
+        reject(new Error(data.message || 'Failed to load the document.'));
+      });
+      plugin.openDocumentBuffer({ buffer, name, autoActivate: true });
+    }),
+    'Timed out waiting for the document to load.'
+  );
+}
+
 async function initEditor(bytes: Uint8Array) {
   if (editorInitialized) return;
   const container = el('bb-embed-pdf-container');
@@ -344,7 +392,11 @@ async function initEditor(bytes: Uint8Array) {
       defaultFileName: MERGED_FILE_NAME,
     },
     documentManager: {
-      maxDocuments: 1,
+      // 2, not 1: Big Band only ever shows one document at a time, but
+      // reloading after watermark removal closes the old one and opens the
+      // cleaned copy — if that open starts before the close has actually
+      // taken effect, a limit of 1 would silently reject it.
+      maxDocuments: 2,
     },
     tabBar: 'never',
   });
@@ -374,11 +426,7 @@ async function initEditor(bytes: Uint8Array) {
     type: 'application/pdf',
   });
   const buffer = await file.arrayBuffer();
-  docManagerPlugin.openDocumentBuffer({
-    buffer,
-    name: MERGED_FILE_NAME,
-    autoActivate: true,
-  });
+  await openDocumentAndWait(docManagerPlugin, buffer, MERGED_FILE_NAME);
 
   editorInitialized = true;
 }
@@ -487,17 +535,21 @@ async function removeWatermarksFromDocument() {
 
     // Reload the cleaned document into the same viewer instance so the
     // result is visible immediately and further edits/redactions apply on
-    // top of it.
-    docManagerPlugin.closeDocument(documentId);
+    // top of it. Wait for the close to actually take effect before opening
+    // the replacement — starting the open too early raced the close in
+    // testing (maxDocuments is 2, not 1, for the same reason).
+    await withTimeout(
+      new Promise<void>((resolve) => {
+        docManagerPlugin?.onDocumentClosed(() => resolve());
+        docManagerPlugin?.closeDocument(documentId);
+      }),
+      'Timed out waiting for the previous document to close.'
+    );
     const file = new File([cleanedBytes.slice().buffer], MERGED_FILE_NAME, {
       type: 'application/pdf',
     });
     const buffer = await file.arrayBuffer();
-    docManagerPlugin.openDocumentBuffer({
-      buffer,
-      name: MERGED_FILE_NAME,
-      autoActivate: true,
-    });
+    await openDocumentAndWait(docManagerPlugin, buffer, MERGED_FILE_NAME);
     mergedBytes = cleanedBytes;
 
     showAlert(

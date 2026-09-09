@@ -5,6 +5,13 @@ export interface DocManagerPlugin {
   onDocumentOpened: (
     callback: (data: { id?: string; name?: string }) => void
   ) => void;
+  onDocumentError: (
+    callback: (data: {
+      documentId?: string;
+      message?: string;
+      code?: string;
+    }) => void
+  ) => void;
   openDocumentBuffer: (opts: {
     buffer: ArrayBuffer;
     name?: string;
