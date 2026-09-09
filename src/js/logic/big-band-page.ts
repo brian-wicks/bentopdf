@@ -20,6 +20,10 @@ import {
   openRedactionPanel,
   type PluginRegistryLite,
 } from '../utils/redact-search.js';
+import {
+  scanForWatermarks,
+  removeWatermarks,
+} from '../utils/watermark-removal.js';
 
 const embedPdfWasmUrl = new URL(
   'bentopdf-viewer/dist/pdfium.wasm',
@@ -144,9 +148,6 @@ function resetAll() {
   const multiToolFrame = el<HTMLIFrameElement>('bb-multitool-frame');
   if (multiToolFrame) multiToolFrame.src = 'about:blank';
 
-  const processActions = el('bb-process-actions');
-  if (processActions) processActions.classList.add('hidden');
-
   goToStep(1);
 }
 
@@ -253,8 +254,6 @@ async function startProcessing() {
   // utility class at equal CSS specificity depending on stylesheet order —
   // toggle the inline style directly so hiding it is never ambiguous.
   if (spinner) spinner.style.display = '';
-  const actions = el('bb-process-actions');
-  if (actions) actions.classList.add('hidden');
 
   setProcessStatus(`Checking ${uploadedFiles.length} file(s) for passwords...`);
 
@@ -312,11 +311,19 @@ async function startProcessing() {
     return;
   }
 
-  if (spinner) spinner.style.display = 'none';
-  setProcessStatus(
-    `Done! Merged ${strippedBytesList.length} file(s) into a single ${formatBytes(mergedBytes.length)} PDF.`
-  );
-  if (actions) actions.classList.remove('hidden');
+  setProcessStatus('Loading editor...');
+  try {
+    await initEditor(mergedBytes);
+  } catch (err) {
+    console.error('Big Band: editor init failed', err);
+    showAlert('Error', 'Failed to load the PDF editor.');
+    goToStep(1);
+    return;
+  } finally {
+    if (spinner) spinner.style.display = 'none';
+  }
+
+  goToStep(3);
 }
 
 async function initEditor(bytes: Uint8Array) {
@@ -448,6 +455,64 @@ async function findAndRedactAll() {
   }
 }
 
+async function removeWatermarksFromDocument() {
+  if (!editorInitialized || !docManagerPlugin) {
+    showAlert('Error', 'The editor is not ready yet.');
+    return;
+  }
+  const documentId = docManagerPlugin.getActiveDocumentId();
+  if (!documentId) {
+    showAlert('Error', 'No document is open.');
+    return;
+  }
+
+  showLoader('Scanning for watermarks...');
+  try {
+    const currentBytes = await exportCurrentEditorBytes();
+    const scan = await scanForWatermarks(currentBytes);
+
+    if (scan.candidates.length === 0) {
+      showAlert(
+        'No Watermarks Found',
+        'No repeated watermark images were detected in this document.'
+      );
+      return;
+    }
+
+    showLoader('Removing watermarks...');
+    const { bytes: cleanedBytes, removedCount } = await removeWatermarks(
+      scan,
+      scan.candidates.map((c) => c.id)
+    );
+
+    // Reload the cleaned document into the same viewer instance so the
+    // result is visible immediately and further edits/redactions apply on
+    // top of it.
+    docManagerPlugin.closeDocument(documentId);
+    const file = new File([cleanedBytes.slice().buffer], MERGED_FILE_NAME, {
+      type: 'application/pdf',
+    });
+    const buffer = await file.arrayBuffer();
+    docManagerPlugin.openDocumentBuffer({
+      buffer,
+      name: MERGED_FILE_NAME,
+      autoActivate: true,
+    });
+    mergedBytes = cleanedBytes;
+
+    showAlert(
+      'Watermarks Removed',
+      `Removed ${removedCount} watermark instance(s) from this document.`,
+      'success'
+    );
+  } catch (err) {
+    console.error('Big Band: watermark removal failed', err);
+    showAlert('Error', 'Failed to scan or remove watermarks.');
+  } finally {
+    hideLoader();
+  }
+}
+
 let multiToolMessageHandler: ((event: MessageEvent) => void) | null = null;
 
 function goToMultiTool(bytes: Uint8Array) {
@@ -520,29 +585,6 @@ function initializePage() {
     void startProcessing();
   });
 
-  el<HTMLButtonElement>('bb-download-merged')?.addEventListener('click', () => {
-    if (!mergedBytes) return;
-    const blob = new Blob([new Uint8Array(mergedBytes)], {
-      type: 'application/pdf',
-    });
-    downloadFile(blob, MERGED_FILE_NAME);
-  });
-
-  el<HTMLButtonElement>('bb-continue-to-edit')?.addEventListener(
-    'click',
-    () => {
-      if (!mergedBytes) return;
-      goToStep(3);
-      showLoader('Loading editor...');
-      initEditor(mergedBytes)
-        .catch((err) => {
-          console.error('Big Band: editor init failed', err);
-          showAlert('Error', 'Failed to load the PDF editor.');
-        })
-        .finally(() => hideLoader());
-    }
-  );
-
   el<HTMLButtonElement>('bb-download-edited')?.addEventListener('click', () => {
     void downloadCurrentPdf();
   });
@@ -560,6 +602,13 @@ function initializePage() {
         e.preventDefault();
         void findAndRedactAll();
       }
+    }
+  );
+
+  el<HTMLButtonElement>('bb-remove-watermarks-btn')?.addEventListener(
+    'click',
+    () => {
+      void removeWatermarksFromDocument();
     }
   );
 
